@@ -7,15 +7,37 @@
 body{
 
     margin:0;
-    background:
-        radial-gradient(circle at 15% 0%, rgba(37,99,235,.12), transparent 40%),
-        radial-gradient(circle at 85% 20%, rgba(168,85,247,.10), transparent 45%),
-        #080b12;
+    background-color:#0a1128;
+    background-image:
+        radial-gradient(circle at 15% 0%, rgba(37,99,235,.10), transparent 40%),
+        radial-gradient(circle at 85% 20%, rgba(168,85,247,.08), transparent 45%),
+        repeating-radial-gradient(circle at 20% 15%, transparent 0, transparent 60px, rgba(96,165,250,.05) 61px, rgba(96,165,250,.05) 62px),
+        repeating-radial-gradient(circle at 90% 75%, transparent 0, transparent 70px, rgba(220,38,38,.05) 71px, rgba(220,38,38,.05) 72px),
+        linear-gradient(180deg, #0a1128 0%, #0d1530 45%, #0a1128 100%);
+    background-attachment:fixed;
     color:#fff;
 
 }
 
-::-webkit-scrollbar{ width:10px; height:10px; }
+body::before{
+
+    content:"";
+    position:fixed;
+    inset:0;
+    z-index:0;
+    pointer-events:none;
+    opacity:.35;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Cg fill='none' stroke='%23274370' stroke-width='1.4'%3E%3Cpath d='M-50 40 Q 50 0 150 40 T 350 40 T 550 40'/%3E%3Cpath d='M-50 90 Q 50 50 150 90 T 350 90 T 550 90'/%3E%3Cpath d='M-50 140 Q 50 100 150 140 T 350 140 T 550 140'/%3E%3Cpath d='M-50 190 Q 50 150 150 190 T 350 190 T 550 190'/%3E%3Cpath d='M-50 240 Q 50 200 150 240 T 350 240 T 550 240'/%3E%3Cpath d='M-50 290 Q 50 250 150 290 T 350 290 T 550 290'/%3E%3Cpath d='M-50 340 Q 50 300 150 340 T 350 340 T 550 340'/%3E%3Cpath d='M-50 390 Q 50 350 150 390 T 350 390 T 550 390' /%3E%3C/g%3E%3C/svg%3E");
+    background-size:420px 420px;
+
+}
+
+.layout{
+
+    position:relative;
+    z-index:1;
+
+}
 ::-webkit-scrollbar-track{ background:#0b0f18; }
 ::-webkit-scrollbar-thumb{ background:#2b3550; border-radius:20px; }
 ::-webkit-scrollbar-thumb:hover{ background:#3b4a72; }
@@ -1082,5 +1104,57 @@ margin-top:8px;
     border-radius:10px;
     padding:14px 16px;
     margin-bottom:10px;
+
+}
+
+
+/* =====================================
+   CANLI MAÇ
+===================================== */
+
+.liveDot{
+
+    width:10px;
+    height:10px;
+    border-radius:50%;
+    background:#dc2626;
+    box-shadow:0 0 0 0 rgba(220,38,38,.6);
+    animation:livePulse 1.5s infinite;
+
+}
+
+@keyframes livePulse{
+
+    0%{ box-shadow:0 0 0 0 rgba(220,38,38,.6); }
+    70%{ box-shadow:0 0 0 10px rgba(220,38,38,0); }
+    100%{ box-shadow:0 0 0 0 rgba(220,38,38,0); }
+
+}
+
+.eventLine{
+
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:10px 14px;
+    background:#0d111c;
+    border:1px solid #1c2334;
+    border-radius:10px;
+    margin-bottom:6px;
+    font-size:14px;
+
+}
+
+.eventMinute{
+
+    font-weight:bold;
+    color:#60a5fa;
+    min-width:32px;
+
+}
+
+.eventIcon{
+
+    font-size:16px;
 
 }

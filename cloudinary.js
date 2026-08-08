@@ -31,16 +31,17 @@ export async function uploadPlayerImage(file) {
 
 
 
-    const response =
-    await fetch(
-        url,
-        {
-            method:"POST",
-            body:formData
-        }
-    );
+    let response;
 
-
+    try {
+        response = await fetch(url, {
+            method: "POST",
+            body: formData
+        });
+    } catch (networkError) {
+        console.error("Cloudinary bağlantı hatası:", networkError);
+        throw new Error("Fotoğraf yüklenemedi: sunucuya bağlanılamadı (internet/CORS kontrol et)");
+    }
 
     const data =
     await response.json();
@@ -49,10 +50,12 @@ export async function uploadPlayerImage(file) {
 
     if(!data.secure_url){
 
-        console.log(data);
+        console.error("Cloudinary yanıtı:", data);
+
+        const reason = data?.error?.message || "bilinmeyen hata";
 
         throw new Error(
-            "Fotoğraf yüklenemedi"
+            "Fotoğraf yüklenemedi: " + reason
         );
 
     }

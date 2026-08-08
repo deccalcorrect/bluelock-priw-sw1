@@ -1463,7 +1463,7 @@ function renderMatchDetail(match) {
     `;
 }
 
-
+async function getPlayersByTeam(teamId) {
     const all = await getPlayersRanking();
     return all.filter(p => p.teamId === teamId);
 }

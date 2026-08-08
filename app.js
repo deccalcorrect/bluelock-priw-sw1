@@ -12,7 +12,9 @@ import {
     doc,
     updateDoc,
     setDoc,
-    deleteDoc
+    deleteDoc,
+    onSnapshot,
+    increment
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 
@@ -85,6 +87,15 @@ function formatEuro(amount) {
 
 const DEFAULT_STAT_CAP = 60;
 
+// Canlı maç olay tipleri
+const EVENT_TYPES = {
+    gol: { label: "Gol", icon: "⚽" },
+    sarikart: { label: "Sarı Kart", icon: "🟨" },
+    kirmizikart: { label: "Kırmızı Kart", icon: "🟥" },
+    matchup: { label: "Match-up", icon: "🔀" },
+    kritik: { label: "Kritik Müdahale", icon: "🛡" }
+};
+
 
 // =====================================
 // GENEL DURUM (STATE)
@@ -93,7 +104,9 @@ const DEFAULT_STAT_CAP = 60;
 const state = {
     statCap: DEFAULT_STAT_CAP,
     currentPlayerId: null,
-    currentTeamId: null
+    currentTeamId: null,
+    currentMatchId: null,
+    allMatches: []
 };
 
 
@@ -197,6 +210,7 @@ const PAGE_TITLES = {
     teamDetail: "Takım Detayı",
     league: "Lig",
     matchResults: "Maç Sonuçları",
+    matchControl: "Maç Kontrolü",
     addPlayer: "Oyuncu Ekle",
     addTeam: "Takım Ekle",
     admin: "Admin Paneli"
@@ -216,11 +230,12 @@ window.showPage = function (pageId) {
     if (title) title.innerHTML = PAGE_TITLES[pageId] || "";
 
     // Sayfaya girerken ilgili veriyi tazele
+    if (pageId === "dashboard") { renderLiveMatches("dashboardLiveArea"); }
     if (pageId === "players") loadPlayers();
     if (pageId === "teams") loadTeams();
     if (pageId === "marketValue") loadMarketValueList();
     if (pageId === "league") { loadLeagueTable(); }
-    if (pageId === "matchResults") { loadMatches(); loadMatchTeams(); }
+    if (pageId === "matchResults") { loadMatches(); loadMatchTeams(); renderLiveMatches("liveMatchesArea"); }
     if (pageId === "addPlayer") { loadTeamSelect(); renderCoreStatInputs(); }
     if (pageId === "admin") renderAdminPage();
 };
@@ -994,7 +1009,7 @@ window.loadTeamSelect = async function () {
 };
 
 window.loadMatchTeams = async function () {
-    const selects = ["homeTeam", "awayTeam"];
+    const selects = ["homeTeam", "awayTeam", "liveHomeTeam", "liveAwayTeam"];
     const teams = await getTeamsData();
 
     selects.forEach(id => {
@@ -1190,6 +1205,477 @@ window.deleteMatch = async function (id) {
 
     await deleteDoc(doc(db, "matches", id));
     loadMatches();
+};
+
+
+// =====================================
+// CANLI MAÇ SİSTEMİ
+// =====================================
+
+function newEventId() {
+    if (window.crypto && window.crypto.randomUUID) return window.crypto.randomUUID();
+    return "ev_" + Date.now() + "_" + Math.random().toString(16).slice(2);
+}
+
+// Firestore "matches" koleksiyonunu canlı dinler, her değişimde
+// dashboard / maç sonuçları / maç kontrol panelini günceller.
+function startMatchesListener() {
+    onSnapshot(collection(db, "matches"), (snap) => {
+        const matches = [];
+        snap.forEach(item => matches.push({ id: item.id, ...item.data() }));
+        state.allMatches = matches;
+
+        renderLiveMatches("dashboardLiveArea");
+        renderLiveMatches("liveMatchesArea");
+
+        if (state.currentMatchId) {
+            const current = matches.find(m => m.id === state.currentMatchId);
+            if (current) renderMatchControl(current);
+        }
+    }, (error) => {
+        console.error("Maç dinleyici hatası:", error);
+    });
+}
+
+window.startLiveMatch = async function () {
+    if (!isAdmin) { alert("Yetkin yok"); return; }
+
+    const home = value("liveHomeTeam");
+    const away = value("liveAwayTeam");
+
+    if (!home || !away) { alert("İki takım da seçilmeli"); return; }
+    if (home === away) { alert("Aynı takım seçilemez"); return; }
+
+    const homeTeam = await getTeamById(home);
+    const awayTeam = await getTeamById(away);
+    if (!homeTeam || !awayTeam) return;
+
+    await addDoc(collection(db, "matches"), {
+        homeId: home, awayId: away,
+        homeName: homeTeam.name, awayName: awayTeam.name,
+        homeGoals: 0, awayGoals: 0,
+        status: "live",
+        events: [],
+        createdAt: new Date()
+    });
+
+    alert("Canlı maç başlatıldı");
+};
+
+// Misafirlerin de gördüğü canlı maç(lar) bölümü — dashboard ve Maç Sonuçları'nda kullanılır.
+window.renderLiveMatches = function (containerId) {
+    const area = document.getElementById(containerId);
+    if (!area) return;
+
+    const liveMatches = (state.allMatches || []).filter(m => m.status === "live");
+
+    if (!liveMatches.length) {
+        area.innerHTML = "";
+        return;
+    }
+
+    area.innerHTML = liveMatches.map(match => {
+        const events = (match.events || []).slice().sort((a, b) => (a.minute || 0) - (b.minute || 0));
+
+        const timeline = events.length ? events.map(ev => renderEventLine(ev)).join("") : `<div class="capNote">Henüz olay yok.</div>`;
+
+        return `
+        <div class="fm-card" style="margin-bottom:18px;border-color:#dc2626;">
+            <div class="fm-header" style="justify-content:space-between;">
+                <div class="fm-info">
+                    <h2 style="display:flex;align-items:center;gap:10px;">
+                        <span class="liveDot"></span> CANLI
+                    </h2>
+                    <h3>${escapeHtml(match.homeName)} <span style="color:#fff;font-size:22px;">${match.homeGoals ?? 0} - ${match.awayGoals ?? 0}</span> ${escapeHtml(match.awayName)}</h3>
+                </div>
+                ${isAdmin ? `<button class="btn" onclick="openMatchControl('${match.id}')">Maçı Yönet</button>` : ""}
+            </div>
+            <div class="attribute-section">
+                <h3>Dakika Dakika</h3>
+                ${timeline}
+            </div>
+        </div>
+        `;
+    }).join("");
+};
+
+function eventDescription(ev) {
+    if (ev.type === "gol") {
+        return `${escapeHtml(ev.scorerName)}${ev.assistName ? ` (asist: ${escapeHtml(ev.assistName)})` : ""} — ${escapeHtml(ev.teamName)}`;
+    }
+    if (ev.type === "sarikart" || ev.type === "kirmizikart" || ev.type === "kritik") {
+        return `${escapeHtml(ev.playerName)} — ${escapeHtml(ev.teamName)}`;
+    }
+    if (ev.type === "matchup") {
+        return `${escapeHtml(ev.playerAName)} vs ${escapeHtml(ev.playerBName)} — kazanan: <strong>${escapeHtml(ev.winnerName)}</strong>`;
+    }
+    return "";
+}
+
+function renderEventLine(ev) {
+    const meta = EVENT_TYPES[ev.type] || { label: ev.type, icon: "•" };
+
+    return `
+    <div class="eventLine">
+        <span class="eventMinute">${ev.minute}'</span>
+        <span class="eventIcon">${meta.icon}</span>
+        <span>${eventDescription(ev)}</span>
+    </div>
+    `;
+}
+
+window.openMatchControl = function (matchId) {
+    if (!isAdmin) { alert("Yetkin yok"); return; }
+
+    state.currentMatchId = matchId;
+    window.currentMatchId = matchId;
+
+    const match = (state.allMatches || []).find(m => m.id === matchId);
+    if (match) renderMatchControl(match);
+
+    showPage("matchControl");
+};
+
+async function renderMatchControl(match) {
+    const area = document.getElementById("matchControlArea");
+    if (!area) return;
+
+    if (match.status === "finished") {
+        area.innerHTML = `
+        <div class="fm-card">
+            <h2>${escapeHtml(match.homeName)} ${match.homeGoals} - ${match.awayGoals} ${escapeHtml(match.awayName)}</h2>
+            <p class="capNote">Bu maç sona erdi, istatistikler oyunculara işlendi.</p>
+        </div>
+        `;
+        return;
+    }
+
+    const homePlayers = await getPlayersByTeam(match.homeId);
+    const awayPlayers = await getPlayersByTeam(match.awayId);
+    const allPlayers = [...homePlayers, ...awayPlayers];
+
+    const events = (match.events || []).slice().sort((a, b) => (a.minute || 0) - (b.minute || 0));
+
+    area.innerHTML = `
+    <div class="fm-card" style="border-color:#dc2626;">
+        <div class="fm-header" style="justify-content:space-between;">
+            <div class="fm-info">
+                <h2 style="display:flex;align-items:center;gap:10px;"><span class="liveDot"></span> CANLI</h2>
+                <h3>${escapeHtml(match.homeName)} <span style="color:#fff;font-size:22px;">${match.homeGoals ?? 0} - ${match.awayGoals ?? 0}</span> ${escapeHtml(match.awayName)}</h3>
+            </div>
+            <button class="btn danger" onclick="finishLiveMatch('${match.id}')">🏁 Maçı Bitir</button>
+        </div>
+    </div>
+
+    <div class="panel">
+        <h3>Olay Ekle</h3>
+
+        <div class="formGrid">
+            <div>
+                <label>Dakika</label>
+                <input id="evMinute" type="number" min="0" max="130" placeholder="Örn: 23">
+            </div>
+            <div>
+                <label>Olay Tipi</label>
+                <select id="evType" onchange="renderEventForm('${match.id}')">
+                    ${Object.entries(EVENT_TYPES).map(([key, meta]) => `<option value="${key}">${meta.icon} ${meta.label}</option>`).join("")}
+                </select>
+            </div>
+        </div>
+
+        <div id="evExtraFields"></div>
+
+        <button class="btn" onclick="addMatchEvent('${match.id}')">Olayı Ekle</button>
+    </div>
+
+    <div class="panel">
+        <h3>Maç Zaman Çizelgesi</h3>
+        <div id="eventListArea">
+            ${events.length ? events.map(ev => `
+                <div class="eventLine">
+                    <span class="eventMinute">${ev.minute}'</span>
+                    <span class="eventIcon">${(EVENT_TYPES[ev.type] || {}).icon || "•"}</span>
+                    <span style="flex:1;">${eventDescription(ev)}</span>
+                    <button class="btn danger small" onclick="deleteMatchEvent('${match.id}','${ev.id}')">Sil</button>
+                </div>
+            `).join("") : `<div class="capNote">Henüz olay yok.</div>`}
+        </div>
+    </div>
+    `;
+
+    // Bu maça özel oyuncu listesini global'e koy (form render'ları kullanıyor)
+    window._matchControlPlayers = { home: homePlayers, away: awayPlayers, all: allPlayers, match };
+
+    renderEventForm(match.id);
+}
+
+async function getPlayersByTeam(teamId) {
+    const all = await getPlayersRanking();
+    return all.filter(p => p.teamId === teamId);
+}
+
+window.renderEventForm = function (matchId) {
+    const type = value("evType");
+    const area = document.getElementById("evExtraFields");
+    if (!area) return;
+
+    const ctx = window._matchControlPlayers;
+    if (!ctx) return;
+
+    const { home, away, all, match } = ctx;
+
+    const teamOptionsHtml = `
+        <option value="${match.homeId}">${escapeHtml(match.homeName)}</option>
+        <option value="${match.awayId}">${escapeHtml(match.awayName)}</option>
+    `;
+
+    function playerOptions(list) {
+        return list.map(p => `<option value="${p.id}">${escapeHtml(p.name)}</option>`).join("");
+    }
+
+    if (type === "gol") {
+        area.innerHTML = `
+        <label>Takım</label>
+        <select id="evTeam" onchange="refreshEventPlayerOptions()">${teamOptionsHtml}</select>
+
+        <label>Golü Atan</label>
+        <select id="evScorer"></select>
+
+        <label>Asist Yapan (opsiyonel)</label>
+        <select id="evAssist"><option value="">Yok</option></select>
+        `;
+        refreshEventPlayerOptions();
+    } else if (type === "sarikart" || type === "kirmizikart" || type === "kritik") {
+        area.innerHTML = `
+        <label>Takım</label>
+        <select id="evTeam" onchange="refreshEventPlayerOptions()">${teamOptionsHtml}</select>
+
+        <label>Oyuncu</label>
+        <select id="evPlayer"></select>
+        `;
+        refreshEventPlayerOptions();
+    } else if (type === "matchup") {
+        area.innerHTML = `
+        <label>1. Oyuncu</label>
+        <select id="evPlayerA">${playerOptions(all)}</select>
+
+        <label>2. Oyuncu</label>
+        <select id="evPlayerB">${playerOptions(all)}</select>
+
+        <label>Kazanan</label>
+        <select id="evWinner">${playerOptions(all)}</select>
+        `;
+    }
+};
+
+window.refreshEventPlayerOptions = function () {
+    const ctx = window._matchControlPlayers;
+    if (!ctx) return;
+
+    const teamId = value("evTeam");
+    const list = teamId === ctx.match.homeId ? ctx.home : ctx.away;
+
+    const scorerSelect = document.getElementById("evScorer");
+    const assistSelect = document.getElementById("evAssist");
+    const playerSelect = document.getElementById("evPlayer");
+
+    const opts = list.map(p => `<option value="${p.id}">${escapeHtml(p.name)}</option>`).join("");
+
+    if (scorerSelect) scorerSelect.innerHTML = opts;
+    if (assistSelect) assistSelect.innerHTML = `<option value="">Yok</option>` + opts;
+    if (playerSelect) playerSelect.innerHTML = opts;
+};
+
+window.addMatchEvent = async function (matchId) {
+    if (!isAdmin) { alert("Yetkin yok"); return; }
+
+    const minute = Number(value("evMinute"));
+    const type = value("evType");
+
+    if (!minute && minute !== 0) { alert("Dakika gir"); return; }
+
+    const ctx = window._matchControlPlayers;
+    if (!ctx) return;
+
+    const matchRef = doc(db, "matches", matchId);
+    const snap = await getDoc(matchRef);
+    if (!snap.exists()) return;
+
+    const match = snap.data();
+    const events = match.events || [];
+
+    let event = { id: newEventId(), minute, type };
+    let homeGoals = match.homeGoals || 0;
+    let awayGoals = match.awayGoals || 0;
+
+    if (type === "gol") {
+        const teamId = value("evTeam");
+        const scorerId = value("evScorer");
+        const assistId = value("evAssist");
+
+        const scorer = ctx.all.find(p => p.id === scorerId);
+        if (!scorer) { alert("Golü atan oyuncuyu seç"); return; }
+
+        const assist = assistId ? ctx.all.find(p => p.id === assistId) : null;
+        const teamName = teamId === match.homeId ? match.homeName : match.awayName;
+
+        event = {
+            ...event,
+            teamId, teamName,
+            scorerId, scorerName: scorer.name,
+            assistId: assistId || "", assistName: assist ? assist.name : ""
+        };
+
+        if (teamId === match.homeId) homeGoals++; else awayGoals++;
+
+    } else if (type === "sarikart" || type === "kirmizikart" || type === "kritik") {
+        const teamId = value("evTeam");
+        const playerId = value("evPlayer");
+        const player = ctx.all.find(p => p.id === playerId);
+        if (!player) { alert("Oyuncu seç"); return; }
+
+        const teamName = teamId === match.homeId ? match.homeName : match.awayName;
+
+        event = { ...event, teamId, teamName, playerId, playerName: player.name };
+
+    } else if (type === "matchup") {
+        const playerAId = value("evPlayerA");
+        const playerBId = value("evPlayerB");
+        const winnerId = value("evWinner");
+
+        const playerA = ctx.all.find(p => p.id === playerAId);
+        const playerB = ctx.all.find(p => p.id === playerBId);
+        const winner = ctx.all.find(p => p.id === winnerId);
+
+        if (!playerA || !playerB || !winner) { alert("Oyuncuları seç"); return; }
+        if (playerAId === playerBId) { alert("Aynı oyuncu iki tarafta olamaz"); return; }
+
+        event = {
+            ...event,
+            playerAId, playerAName: playerA.name,
+            playerBId, playerBName: playerB.name,
+            winnerId, winnerName: winner.name
+        };
+    }
+
+    events.push(event);
+
+    await updateDoc(matchRef, { events, homeGoals, awayGoals });
+
+    clear("evMinute");
+};
+
+window.deleteMatchEvent = async function (matchId, eventId) {
+    if (!isAdmin) { alert("Yetkin yok"); return; }
+
+    const matchRef = doc(db, "matches", matchId);
+    const snap = await getDoc(matchRef);
+    if (!snap.exists()) return;
+
+    const match = snap.data();
+    const events = match.events || [];
+    const removed = events.find(e => e.id === eventId);
+    const remaining = events.filter(e => e.id !== eventId);
+
+    let homeGoals = match.homeGoals || 0;
+    let awayGoals = match.awayGoals || 0;
+
+    if (removed && removed.type === "gol") {
+        if (removed.teamId === match.homeId) homeGoals = Math.max(0, homeGoals - 1);
+        else awayGoals = Math.max(0, awayGoals - 1);
+    }
+
+    await updateDoc(matchRef, { events: remaining, homeGoals, awayGoals });
+};
+
+// Maçı bitirir: tüm olayları oyuncu istatistiklerine işler, takım puan
+// durumunu günceller ve maçı "finished" olarak işaretler.
+window.finishLiveMatch = async function (matchId) {
+    if (!isAdmin) { alert("Yetkin yok"); return; }
+
+    if (!confirm("Maç bitirilsin mi? Tüm olaylar oyuncu istatistiklerine işlenecek, bu işlem geri alınamaz.")) return;
+
+    const matchRef = doc(db, "matches", matchId);
+    const snap = await getDoc(matchRef);
+    if (!snap.exists()) return;
+
+    const match = snap.data();
+    if (match.status === "finished") { alert("Bu maç zaten bitirilmiş"); return; }
+
+    const events = match.events || [];
+    const participantIds = new Set();
+
+    for (const ev of events) {
+        if (ev.type === "gol") {
+            await updateDoc(doc(db, "players", ev.scorerId), { goals: increment(1) });
+            participantIds.add(ev.scorerId);
+
+            if (ev.assistId) {
+                await updateDoc(doc(db, "players", ev.assistId), { assists: increment(1) });
+                participantIds.add(ev.assistId);
+            }
+        } else if (ev.type === "sarikart") {
+            await updateDoc(doc(db, "players", ev.playerId), { yellowCards: increment(1) });
+            participantIds.add(ev.playerId);
+        } else if (ev.type === "kirmizikart") {
+            await updateDoc(doc(db, "players", ev.playerId), { redCards: increment(1) });
+            participantIds.add(ev.playerId);
+        } else if (ev.type === "kritik") {
+            await updateDoc(doc(db, "players", ev.playerId), { criticalInterventions: increment(1) });
+            participantIds.add(ev.playerId);
+        } else if (ev.type === "matchup") {
+            await updateDoc(doc(db, "players", ev.winnerId), { matchups: increment(1) });
+            participantIds.add(ev.playerAId);
+            participantIds.add(ev.playerBId);
+        }
+    }
+
+    for (const playerId of participantIds) {
+        await updateDoc(doc(db, "players", playerId), { matches: increment(1) });
+    }
+
+    // Takım puan durumunu güncelle (mevcut hızlı sonuç mantığıyla aynı)
+    const homeRef = doc(db, "teams", match.homeId);
+    const awayRef = doc(db, "teams", match.awayId);
+    const homeSnap = await getDoc(homeRef);
+    const awaySnap = await getDoc(awayRef);
+
+    if (homeSnap.exists() && awaySnap.exists()) {
+        const h = homeSnap.data();
+        const a = awaySnap.data();
+        const homeGoals = match.homeGoals || 0;
+        const awayGoals = match.awayGoals || 0;
+
+        let hPoints = h.points || 0, aPoints = a.points || 0;
+        let hWins = h.wins || 0, aWins = a.wins || 0;
+        let hDraws = h.draws || 0, aDraws = a.draws || 0;
+        let hLoss = h.losses || 0, aLoss = a.losses || 0;
+
+        if (homeGoals > awayGoals) { hPoints += 3; hWins++; aLoss++; }
+        else if (homeGoals < awayGoals) { aPoints += 3; aWins++; hLoss++; }
+        else { hPoints += 1; aPoints += 1; hDraws++; aDraws++; }
+
+        await updateDoc(homeRef, {
+            points: hPoints, wins: hWins, draws: hDraws, losses: hLoss,
+            goals: (h.goals || 0) + homeGoals, conceded: (h.conceded || 0) + awayGoals
+        });
+
+        await updateDoc(awayRef, {
+            points: aPoints, wins: aWins, draws: aDraws, losses: aLoss,
+            goals: (a.goals || 0) + awayGoals, conceded: (a.conceded || 0) + homeGoals
+        });
+    }
+
+    await updateDoc(matchRef, { status: "finished", finishedAt: new Date() });
+
+    alert("Maç bitirildi, istatistikler işlendi");
+    state.currentMatchId = null;
+    window.currentMatchId = null;
+
+    showPage("matchResults");
+    loadLeagueTable();
+    loadTeams();
+    updateDashboard();
 };
 
 
@@ -1501,6 +1987,8 @@ async function startApp() {
     await updateDashboard();
     await loadTeamSelect();
     renderCoreStatInputs();
+
+    startMatchesListener();
 
     showPage("dashboard");
 

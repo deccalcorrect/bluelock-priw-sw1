@@ -1025,7 +1025,64 @@ loadPlayers();
 
 
 
+// =========================
+// TAKIM DROPDOWN
+// =========================
 
+
+async function loadTeamSelect(){
+
+
+let select =
+document.getElementById("playerTeam");
+
+
+if(!select)
+return;
+
+
+
+select.innerHTML=
+`
+<option>
+Takım Seç
+</option>
+`;
+
+
+
+let snap =
+await getDocs(
+collection(db,"teams")
+);
+
+
+
+snap.forEach(d=>{
+
+
+let t=d.data();
+
+
+
+select.innerHTML += `
+
+
+<option value="${t.name}">
+
+${t.name}
+
+</option>
+
+
+`;
+
+
+
+});
+
+
+}
 
 // =========================
 // BAŞLAT
@@ -1039,3 +1096,5 @@ loadTeams();
 loadGoals();
 
 loadAssists();
+
+loadTeamSelect();

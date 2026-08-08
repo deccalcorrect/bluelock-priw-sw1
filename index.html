@@ -1,1924 +1,328 @@
 <!DOCTYPE html>
 <html lang="tr">
-
 <head>
-
 <meta charset="UTF-8">
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>
-BlueLock Panel
-</title>
-
-
-<style>
-
-
-*{
-box-sizing:border-box;
-font-family:Arial, sans-serif;
-}
-
-
-body{
-
-margin:0;
-background:#0b0b0f;
-color:white;
-
-}
-
-
-
-header{
-
-background:#111827;
-padding:20px;
-text-align:center;
-
-}
-
-
-
-h1,h2,h3{
-
-margin-top:0;
-
-}
-
-
-
-.container{
-
-padding:20px;
-
-}
-
-
-
-.panel{
-
-background:#161b22;
-border-radius:15px;
-padding:20px;
-margin-bottom:20px;
-
-}
-
-
-
-.grid{
-
-display:grid;
-grid-template-columns:
-repeat(auto-fit,minmax(250px,1fr));
-gap:20px;
-
-}
-
-
-
-
-
-button{
-
-background:#2563eb;
-color:white;
-border:0;
-padding:10px 15px;
-border-radius:8px;
-cursor:pointer;
-
-}
-
-
-button:hover{
-
-opacity:.8;
-
-}
-
-
-
-
-
-input,
-select{
-
-width:100%;
-padding:10px;
-margin:5px 0;
-background:#0f172a;
-border:1px solid #334155;
-color:white;
-border-radius:8px;
-
-}
-
-
-
-
-
-.card{
-
-background:#111827;
-padding:15px;
-border-radius:12px;
-
-}
-
-
-
-
-
-.playerCard,
-.teamCard{
-
-cursor:pointer;
-transition:.2s;
-
-}
-
-
-
-.playerCard:hover,
-.teamCard:hover{
-
-transform:scale(1.03);
-
-}
-
-
-
-
-
-img{
-
-max-width:100%;
-border-radius:10px;
-
-}
-
-
-
-
-
-.modal{
-
-
-display:none;
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:
-rgba(0,0,0,.8);
-
-align-items:center;
-justify-content:center;
-
-z-index:999;
-
-
-}
-
-
-
-.modalBox{
-
-
-background:#161b22;
-padding:25px;
-border-radius:15px;
-max-width:600px;
-width:90%;
-max-height:90%;
-overflow:auto;
-
-
-}
-
-
-
-
-
-.close{
-
-
-float:right;
-cursor:pointer;
-font-size:25px;
-
-
-}
-
-
-
-
-.rankingRow,
-.leagueRow,
-.matchCard{
-
-background:#111827;
-padding:12px;
-border-radius:10px;
-margin:5px 0;
-
-}
-
-
-
-
-
-.playerImageBox img{
-
-height:180px;
-object-fit:cover;
-
-}
-
-
-
-
-</style>
-
-
+<title>BlueLock Panel</title>
+<link rel="stylesheet" href="style.css">
 </head>
-
-
 <body>
 
+<div class="layout">
+
+    <!-- =====================================
+         SOL MENÜ
+    ===================================== -->
+    <div class="sidebar">
 
+        <h1>⚽ BlueLock</h1>
+        <div class="league">BLUELOCK LİGİ</div>
 
-<header>
+        <button data-page="dashboard" onclick="showPage('dashboard')"><span class="btnLabel">🏠 Ana Sayfa</span></button>
+        <button data-page="players" onclick="showPage('players')"><span class="btnLabel">👤 Oyuncular</span></button>
+        <button data-page="teams" onclick="showPage('teams')"><span class="btnLabel">🏆 Takımlar</span></button>
+        <button data-page="league" onclick="showPage('league')"><span class="btnLabel">📊 Lig</span></button>
+        <button data-page="matchResults" onclick="showPage('matchResults')"><span class="btnLabel">📅 Maç Sonuçları</span></button>
+        <button data-page="addPlayer" onclick="showPage('addPlayer')"><span class="btnLabel">➕ Oyuncu Ekle</span></button>
+        <button data-page="addTeam" onclick="showPage('addTeam')"><span class="btnLabel">➕ Takım Ekle</span></button>
+        <button class="adminNavBtn" data-page="admin" onclick="showPage('admin')"><span class="btnLabel">🔐 Admin Paneli</span></button>
 
+    </div>
 
-<h1>
-⚽ BlueLock Panel
-</h1>
 
+    <!-- =====================================
+         ANA İÇERİK
+    ===================================== -->
+    <div class="content">
 
-<p>
-Oyuncu - Takım - Lig Yönetimi
-</p>
+        <div class="topbar">
+            <h2 id="pageTitle" style="margin:0;">Ana Sayfa</h2>
+            <div>
+                Mod: <span id="permissionText">Ziyaretçi</span>
+                <span id="permissionBadge" class="visitorBadge">Ziyaretçi</span>
+            </div>
+        </div>
 
 
-</header>
+        <!-- ============ ANA SAYFA ============ -->
+        <div id="page-dashboard" class="page">
 
+            <div class="cards">
+                <div class="box">
+                    <h3>Oyuncular</h3>
+                    <p id="playerCount">0</p>
+                </div>
+                <div class="box">
+                    <h3>Takımlar</h3>
+                    <p id="teamCount">0</p>
+                </div>
+                <div class="box">
+                    <h3>Lig Durumu</h3>
+                    <p style="font-size:20px;">Aktif Sezon</p>
+                </div>
+                <div class="box kingBox">
+                    <h3>👑 Gol Kralı</h3>
+                    <div id="goalKing">Veri yok</div>
+                </div>
+                <div class="box kingBox">
+                    <h3>🎯 Asist Kralı</h3>
+                    <div id="assistKing">Veri yok</div>
+                </div>
+            </div>
+
+        </div>
+
+
+        <!-- ============ OYUNCULAR (FORUM TARZI) ============ -->
+        <div id="page-players" class="page hidden">
+
+            <h2>👤 Oyuncular</h2>
+            <p style="color:#64748b;">Bir oyuncuya tıklayarak profilini aç.</p>
+
+            <div class="forum-list">
+                <div class="forum-header">
+                    <span></span>
+                    <span>İsim</span>
+                    <span>Mevki</span>
+                    <span>Takım</span>
+                    <span>Rating</span>
+                    <span>⚽ Gol</span>
+                    <span>🅰️ Asist</span>
+                </div>
+                <div id="playersList"></div>
+            </div>
+
+        </div>
+
+
+        <!-- ============ OYUNCU PROFİLİ (FM TARZI) ============ -->
+        <div id="page-playerProfile" class="page hidden">
+
+            <button class="backBtn" onclick="showPage('players')">← Oyuncular Listesine Dön</button>
+
+            <div id="playerProfileArea"></div>
+
+        </div>
+
+
+        <!-- ============ TAKIMLAR ============ -->
+        <div id="page-teams" class="page hidden">
+
+            <h2>🏆 Takımlar</h2>
+
+            <div class="cards" id="teamsList"></div>
+
+        </div>
+
+
+        <!-- ============ TAKIM DETAY ============ -->
+        <div id="page-teamDetail" class="page hidden">
+
+            <button class="backBtn" onclick="showPage('teams')">← Takımlar Listesine Dön</button>
+
+            <div id="teamDetailArea"></div>
+
+        </div>
+
+
+        <!-- ============ LİG / FİKSTÜR ============ -->
+        <div id="page-league" class="page hidden">
+
+            <h2>📊 Lig Tablosu</h2>
+
+            <div class="panel">
+                <table class="leagueTable">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Takım</th>
+                            <th>O</th>
+                            <th>G</th>
+                            <th>B</th>
+                            <th>M</th>
+                            <th>Atılan</th>
+                            <th>Yenilen</th>
+                            <th>Averaj</th>
+                            <th>Puan</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leagueTable"></tbody>
+                </table>
+            </div>
+
+        </div>
+
+
+        <!-- ============ MAÇ SONUÇLARI (KANAL) ============ -->
+        <div id="page-matchResults" class="page hidden">
+
+            <h2>📅 Maç Sonuçları</h2>
+            <p style="color:#64748b;">Oynanan maçlar ve sonuçları burada listelenir.</p>
+
+            <div class="panel adminOnly">
+                <h3>Yeni Maç Sonucu Ekle</h3>
+                <div class="formGrid">
+                    <div>
+                        <label>Ev Sahibi</label>
+                        <select id="homeTeam"><option value="">Takım Seç</option></select>
+                    </div>
+                    <div>
+                        <label>Deplasman</label>
+                        <select id="awayTeam"><option value="">Takım Seç</option></select>
+                    </div>
+                    <div>
+                        <label>Ev Sahibi Gol</label>
+                        <input id="homeGoals" type="number" value="0">
+                    </div>
+                    <div>
+                        <label>Deplasman Gol</label>
+                        <input id="awayGoals" type="number" value="0">
+                    </div>
+                </div>
+                <button class="btn" onclick="addMatchResult()">Maçı Kaydet</button>
+            </div>
+
+            <div class="panel">
+                <h3>Maç Geçmişi</h3>
+                <div id="matchesList"></div>
+            </div>
+
+        </div>
+
+
+        <!-- ============ OYUNCU EKLE ============ -->
+        <div id="page-addPlayer" class="page hidden">
+
+            <h2>➕ Oyuncu Ekle</h2>
+
+            <div class="panel">
+
+                <div class="formGrid">
+                    <div>
+                        <label>Oyuncu Adı</label>
+                        <input id="playerName" placeholder="Oyuncu adı">
+                    </div>
+                    <div>
+                        <label>Mevki</label>
+                        <input id="playerPosition" placeholder="Örn: Orta Saha">
+                    </div>
+                    <div>
+                        <label>Yaş</label>
+                        <input id="playerAge" type="number" placeholder="Yaş">
+                    </div>
+                    <div>
+                        <label>Boy (cm)</label>
+                        <input id="playerHeight" type="number" placeholder="Boy">
+                    </div>
+                    <div>
+                        <label>Kilo (kg)</label>
+                        <input id="playerWeight" type="number" placeholder="Kilo">
+                    </div>
+                    <div>
+                        <label>Takım</label>
+                        <select id="playerTeam"><option value="">Takım Seç</option></select>
+                    </div>
+                    <div>
+                        <label>Fotoğraf</label>
+                        <input id="playerImage" type="file" accept="image/*">
+                    </div>
+                </div>
 
+                <hr>
 
+                <h3>İstatistikler <span class="capNote" id="statCapNote">(0-60 arası, takım buff'ı ile aşılabilir)</span></h3>
 
-<div class="container">
- <!-- =====================================
-DASHBOARD
-INDEX FINAL 2/10
-===================================== -->
+                <div class="formGrid" id="coreStatInputs"></div>
 
+                <hr>
 
-<div class="panel">
+                <h3>Ek Statlar <span class="capNote">(opsiyonel, özgür alan)</span></h3>
+                <button class="btn ghost small" onclick="addStat()">+ Ek Stat Ekle</button>
+                <div id="statsContainer" style="margin-top:12px;"></div>
 
+                <br>
+                <button class="btn" onclick="savePlayer()">Oyuncu Kaydet</button>
 
-<h2>
-📊 Dashboard
-</h2>
+            </div>
 
+        </div>
 
 
-<div class="grid">
+        <!-- ============ TAKIM EKLE ============ -->
+        <div id="page-addTeam" class="page hidden">
 
+            <h2>➕ Takım Ekle</h2>
 
+            <div class="panel">
+                <label>Takım Adı</label>
+                <input id="teamName" placeholder="Takım adı">
 
-<div class="card">
+                <label>Logo URL</label>
+                <input id="teamLogo" placeholder="https://...">
 
+                <button class="btn" onclick="saveTeam()">Takım Kaydet</button>
+            </div>
 
-<h3>
-Oyuncular
-</h3>
+        </div>
 
 
-<h1 id="playerCount">
-0
-</h1>
+        <!-- ============ ADMIN PANELİ ============ -->
+        <div id="page-admin" class="page hidden">
 
+            <h2>🔐 Admin Paneli</h2>
 
-</div>
-
-
-
-
-
-<div class="card">
-
-
-<h3>
-Takımlar
-</h3>
-
-
-<h1 id="teamCount">
-0
-</h1>
-
-
-</div>
-
-
-
-
-
-
-<div class="card">
-
-
-<h3>
-Lig Durumu
-</h3>
-
-
-<p>
-Aktif Sezon
-</p>
-
-
-</div>
-
-
-
-
-
-<div class="card">
-
-
-<h3>
-Yetki
-</h3>
-
-
-<p id="permissionText">
-
-Ziyaretçi
-
-</p>
-
-
-</div>
-
-
-
-
-</div>
-
-
-
-</div>
-
-
-
-
-
-
-
-
-
-<!-- =====================================
-OYUNCU PANELİ BAŞLANGIÇ
-===================================== -->
-
-
-<div class="panel">
-
-
-<h2>
-⚽ Oyuncu Yönetimi
-</h2>
-
-
-
-<button onclick="addPhysical()">
-
-+ Fiziksel Özellik
-
-</button>
-
-
-
-<button onclick="addStat()">
-
-+ Özel Stat
-
-</button>
-
-
-
-<div class="grid">
-
-
-
-<div>
-
-
-<input
-
-id="playerName"
-
-placeholder="Oyuncu adı"
-
->
-
-
-
-<input
-
-id="playerPosition"
-
-placeholder="Mevki"
-
->
-
-
-
-<input
-
-id="playerAge"
-
-placeholder="Yaş"
-
->
-
-
-
-<input
-
-id="playerHeight"
-
-placeholder="Boy"
-
->
-
-
-
-<input
-
-id="playerWeight"
-
-placeholder="Kilo"
-
->
-
-
-
-<select id="playerTeam">
-
-<option>
-
-Takım Seç
-
-</option>
-
-
-</select>
-
-
-
-
-<input
-
-id="playerImage"
-
-type="file"
-
->
-
-
-
-
-<button onclick="savePlayer()">
-
-Oyuncu Kaydet
-
-</button>
-
-
-
-</div>
-
-
-
-
-
-
-
-<div>
-
-
-<h3>
-Özel Statlar
-</h3>
-
-
-<div id="statsContainer">
-
-
-</div>
-
-
-
-</div>
-
-
-
-
-
-
-
-<div>
-
-
-<h3>
-Fiziksel Özellikler
-</h3>
-
-
-<div id="physicalContainer">
-
-
-</div>
-
-
-
-</div>
-
-
-
-
-
-</div>
-
-
-
-</div>
-<!-- =====================================
-OYUNCU LİSTESİ
-INDEX FINAL 3/10
-===================================== -->
-
-
-<div class="panel">
-
-
-<h2>
-🎴 BlueLock Players
-</h2>
-
-
-
-<p>
-
-Oyunculara tıklayarak detaylarını görebilirsin.
-
-</p>
-
-
-
-
-<div
-
-id="playersList"
-
-class="grid"
-
-
->
-
-
-</div>
-
-
-
-
-</div>
-
-
-
-
-
-
-
-
-
-<!-- =====================================
-OYUNCU PROFİL MODAL
-===================================== -->
-
-
-<div
-
-id="playerModal"
-
-class="modal"
-
-
->
-
-
-
-<div class="modalBox">
-
-
-<span
-
-class="close"
-
-onclick="closeModal('playerModal')"
-
->
-
-×
-
-</span>
-
-
-
-
-<div
-
-id="playerDetail"
-
->
-
-
-</div>
-
-
-
-
-</div>
-
-
-</div>
-
-
-
-
-
-
-
-
-
-<!-- =====================================
-OYUNCU DÜZENLEME MODAL
-===================================== -->
-
-
-<div
-
-id="playerEditModal"
-
-class="modal"
-
-
->
-
-
-<div class="modalBox">
-
-
-<span
-
-class="close"
-
-onclick="closeModal('playerEditModal')"
-
->
-
-×
-
-</span>
-
-
-
-
-<div
-
-id="playerEditArea"
-
->
-
-
-</div>
-
-
-
-
-</div>
-
-
-
-</div>
-<!-- =====================================
-OYUNCU DETAY İÇİN EK ALANLAR
-INDEX FINAL 4/10
-===================================== -->
-
-
-
-<div id="playerStatsEditArea">
-
-
-<!-- Performans butonları buraya gelecek -->
-
-</div>
-
-
-
-
-
-<!-- =====================================
-OYUNCU MANUEL STAT DÜZENLEME
-===================================== -->
-
-
-<div class="panel adminOnly">
-
-
-
-<h3>
-
-Oyuncu İstatistik Düzenleme
-
-</h3>
-
-
-
-
-<input
-
-id="editGoals"
-
-type="number"
-
-placeholder="Gol"
-
->
-
-
-
-
-<input
-
-id="editAssists"
-
-type="number"
-
-placeholder="Asist"
-
->
-
-
-
-
-<input
-
-id="editMatches"
-
-type="number"
-
-placeholder="Maç"
-
->
-
-
-
-
-<input
-
-id="editYellow"
-
-type="number"
-
-placeholder="Sarı Kart"
-
->
-
-
-
-
-<input
-
-id="editRed"
-
-type="number"
-
-placeholder="Kırmızı Kart"
-
->
-
-
-
-
-<button
-
-onclick="updatePlayerStats(window.currentPlayerId)"
-
->
-
-İstatistikleri Güncelle
-
-</button>
-
-
-
-</div>
-
-
-
-
-
-
-
-
-
-
-<!-- =====================================
-OYUNCU GÖRÜNÜM KART ALANI
-BLUELOCK PLAYERS
-===================================== -->
-
-
-<div class="panel">
-
-
-<h2>
-
-🔥 Oyuncu Kart Görünümü
-
-</h2>
-
-
-
-
-<div
-
-id="playerCardPreview"
-
-class="grid"
-
->
-
-
-</div>
-
-
-
-</div>
-<!-- =====================================
-TAKIM YÖNETİMİ
-INDEX FINAL 5/10
-===================================== -->
-
-
-<div class="panel">
-
-
-<h2>
-🏆 Takım Yönetimi
-</h2>
-
-
-
-
-<div class="grid">
-
-
-
-<div>
-
-
-<input
-
-id="teamName"
-
-placeholder="Takım adı"
-
->
-
-
-
-
-<input
-
-id="teamLogo"
-
-placeholder="Logo URL"
-
->
-
-
-
-
-<button onclick="saveTeam()">
-
-Takım Kaydet
-
-</button>
-
-
-
-</div>
-
-
-
-
-
-
-<div>
-
-
-<h3>
-
-Takımlar
-
-</h3>
-
-
-
-
-<div
-
-id="teamsList"
-
-class="grid"
-
->
-
-
-</div>
-
-
-
-</div>
-
-
-
-</div>
-
-
-
-</div>
-
-
-
-
-
-
-
-
-
-<!-- =====================================
-TAKIM DETAY MODAL
-===================================== -->
-
-
-<div
-
-id="teamModal"
-
-class="modal"
-
-
->
-
-
-<div class="modalBox">
-
-
-
-<span
-
-class="close"
-
-onclick="closeModal('teamModal')"
-
->
-
-×
-
-</span>
-
-
-
-
-
-<div
-
-id="teamDetail"
-
->
-
-
-</div>
-
-
-
-
-</div>
-
-
-</div>
-
-
-
-
-
-
-
-
-
-<!-- =====================================
-TAKIM İSTATİSTİK DÜZENLEME
-===================================== -->
-
-
-<div class="panel adminOnly">
-
-
-
-<h3>
-
-Takım İstatistikleri
-
-</h3>
-
-
-
-
-<input
-
-id="editTeamPoints"
-
-type="number"
-
-placeholder="Puan"
-
->
-
-
-
-
-<input
-
-id="editTeamWins"
-
-type="number"
-
-placeholder="Galibiyet"
-
->
-
-
-
-
-<input
-
-id="editTeamDraws"
-
-type="number"
-
-placeholder="Beraberlik"
-
->
-
-
-
-
-<input
-
-id="editTeamLosses"
-
-type="number"
-
-placeholder="Mağlubiyet"
-
->
-
-
-
-
-<input
-
-id="editTeamGoals"
-
-type="number"
-
-placeholder="Attığı Gol"
-
->
-
-
-
-
-<input
-
-id="editTeamConceded"
-
-type="number"
-
-placeholder="Yediği Gol"
-
->
-
-
-
-
-<button
-
-onclick="updateTeamStats(window.currentTeamId)"
-
->
-
-Takım Güncelle
-
-</button>
-
-
-
-</div>
-<!-- =====================================
-LİG SİSTEMİ
-INDEX FINAL 6/10
-===================================== -->
-
-
-<div class="panel">
-
-
-<h2>
-🏆 Lig Sıralaması
-</h2>
-
-
-
-
-<div
-
-id="leagueTable"
-
->
-
-
-</div>
-
-
-
-</div>
-
-
-
-
-
-
-
-
-
-<!-- =====================================
-GOL KRALLIĞI
-===================================== -->
-
-
-<div class="grid">
-
-
-
-
-
-<div class="panel">
-
-
-<h2>
-⚽ Gol Krallığı
-</h2>
-
-
-
-<div
-
-id="goalRanking"
-
->
-
-
-</div>
-
-
-
-
-</div>
-
-
-
-
-
-
-
-<div class="panel">
-
-
-<h2>
-🅰️ Asist Krallığı
-</h2>
-
-
-
-<div
-
-id="assistRanking"
-
->
-
-
-</div>
-
-
-
-
-</div>
-
-
-
-
-
-
-</div>
-
-
-
-
-
-
-
-
-
-<!-- =====================================
-SEZON LİDERLERİ
-===================================== -->
-
-
-
-<div class="grid">
-
-
-
-
-
-<div class="panel">
-
-
-<h2>
-
-👑 Gol Kralı
-
-</h2>
-
-
-<div
-
-id="goalKing"
-
->
-
-
-</div>
-
-
-
-</div>
-
-
-
-
-
-
-
-<div class="panel">
-
-
-<h2>
-
-👑 Asist Kralı
-
-</h2>
-
-
-
-<div
-
-id="assistKing"
-
->
-
-
-</div>
-
-
-
-</div>
-
-
-
-
-
-
-
-</div>
-<!-- =====================================
-MAÇ SİSTEMİ
-INDEX FINAL 7/10
-===================================== -->
-
-
-<div class="panel">
-
-
-<h2>
-⚽ Maç Yönetimi
-</h2>
-
-
-
-
-
-<div class="grid">
-
-
-
-
-
-<div>
-
-
-
-<h3>
-Yeni Maç
-</h3>
-
-
-
-
-<select id="homeTeam">
-
-<option>
-
-Ev Sahibi
-
-</option>
-
-
-</select>
-
-
-
-
-
-
-<select id="awayTeam">
-
-<option>
-
-Deplasman
-
-</option>
-
-
-</select>
-
-
-
-
-
-
-<input
-
-id="homeGoals"
-
-type="number"
-
-placeholder="Ev sahibi gol"
-
-value="0"
-
->
-
-
-
-
-
-<input
-
-id="awayGoals"
-
-type="number"
-
-placeholder="Deplasman gol"
-
-value="0"
-
->
-
-
-
-
-
-
-<button onclick="addMatchResult()">
-
-Maçı Kaydet
-
-</button>
-
-
-
-
-</div>
-
-
-
-
-
-
-
-
-<div>
-
-
-
-<h3>
-
-Maç Geçmişi
-
-</h3>
-
-
-
-<div
-
-id="matchesList"
-
->
-
-
-</div>
-
-
-
-
-</div>
-
-
-
-
-
-</div>
-
-
-
-
-</div>
-<!-- =====================================
-BLUELOCK PLAYERS ÖZEL GÖRÜNÜM
-INDEX FINAL 8/10
-===================================== -->
-
-
-
-<div class="panel">
-
-
-<h2>
-🔥 BlueLock Player Card
-</h2>
-
-
-
-
-<div
-
-id="playerCardPreview"
-
-class="grid"
-
->
-
-
-
-</div>
-
-
-
-</div>
-
-
-
-
-
-
-
-
-
-<!-- =====================================
-OYUNCU ÖZEL STAT PANELİ
-===================================== -->
-
-
-<div class="panel">
+            <!-- Giriş yapılmamışsa -->
+            <div id="adminLoginBox" class="panel admin-login">
+                <h3>Admin Girişi</h3>
+                <label>Şifre</label>
+                <input id="adminPasswordInput" type="password" placeholder="Admin şifresi">
+                <button class="btn" onclick="adminLogin()">Giriş Yap</button>
+            </div>
 
+            <!-- Giriş yapıldıysa -->
+            <div id="adminToolsBox" class="hidden">
 
-<h2>
+                <div class="panel">
+                    <h3>Stat Sınırı</h3>
+                    <p class="capNote">Tüm oyuncu statlarının temel üst sınırı. Bu sınır sadece takım buff'ı ile aşılabilir.</p>
+                    <label>Genel Stat Sınırı</label>
+                    <input id="globalStatCap" type="number" min="1" value="60">
+                    <button class="btn" onclick="saveStatCap()">Sınırı Kaydet</button>
+                </div>
 
-📈 Oyuncu Performansı
+                <div class="panel">
+                    <h3>Takım Buffları</h3>
+                    <p class="capNote">Seçilen takımın tüm oyuncularının efektif statlarına eklenir (60 sınırını aşabilir).</p>
+                    <label>Takım Seç</label>
+                    <select id="buffTeamSelect" onchange="loadTeamBuffForm()"><option value="">Takım Seç</option></select>
 
-</h2>
+                    <div id="buffFormArea"></div>
+                </div>
 
+                <div class="panel">
+                    <h3>Oturum</h3>
+                    <button class="btn danger" onclick="adminLogout()">Çıkış Yap</button>
+                </div>
 
+            </div>
 
+        </div>
 
-<div class="grid">
+    </div>
 
-
-
-
-
-<div class="card">
-
-
-<h3>
-Rating
-</h3>
-
-
-<h1 id="playerRating">
-
-0
-
-</h1>
-
-
-</div>
-
-
-
-
-
-
-
-<div class="card">
-
-
-<h3>
-Potansiyel
-</h3>
-
-
-<h1 id="playerPotential">
-
-0
-
-</h1>
-
-
-</div>
-
-
-
-
-
-
-
-<div class="card">
-
-
-<h3>
-Form
-</h3>
-
-
-<h1 id="playerForm">
-
-0
-
-</h1>
-
-
-</div>
-
-
-
-
-
-
-</div>
-
-
-
-
-</div>
-
-
-
-
-
-
-
-
-
-<!-- =====================================
-OYUNCU GELİŞİM STATLARI
-===================================== -->
-
-
-
-<div class="panel">
-
-
-<h2>
-
-🎯 Özel Statlar
-
-</h2>
-
-
-
-<div
-
-id="playerSpecialStats"
-
-class="grid"
-
->
-
-
-</div>
-
-
-
-</div>
-// =====================================
-// NAVİGASYON VE YÖNETİM
-// INDEX FINAL 9/10
-// =====================================
-
-
-
-<div class="panel">
-
-
-<h2>
-🎮 Panel Kontrol
-</h2>
-
-
-
-
-<div class="grid">
-
-
-
-
-
-<button onclick="loadPlayers()">
-
-⚽ Oyuncular
-
-</button>
-
-
-
-
-
-
-<button onclick="loadTeams()">
-
-🏆 Takımlar
-
-</button>
-
-
-
-
-
-
-
-<button onclick="loadLeagueTable()">
-
-📊 Lig
-
-</button>
-
-
-
-
-
-
-
-<button onclick="loadMatches()">
-
-📅 Maçlar
-
-</button>
-
-
-
-
-
-
-<button onclick="loadGoalRanking()">
-
-👑 Gol Krallığı
-
-</button>
-
-
-
-
-
-
-<button onclick="loadAssistRanking()">
-
-🎯 Asist Krallığı
-
-</button>
-
-
-
-
-
-</div>
-
-
-
-
-</div>
-
-
-
-
-
-
-
-
-
-<!-- =====================================
-YETKİ BİLGİSİ
-===================================== -->
-
-
-<div class="panel">
-
-
-<h2>
-
-🔐 Yetki Durumu
-
-</h2>
-
-
-
-
-<div class="card">
-
-
-
-<p>
-
-Mod:
-
-</p>
-
-
-
-<h3 id="permissionText">
-
-Ziyaretçi
-
-</h3>
-
-
-
-</div>
-
-
-
 </div>
-<!-- =====================================
-FIREBASE + APP BAĞLANTILARI
-INDEX FINAL 10/10
-===================================== -->
 
 
+<!-- Genel amaçlı basit düzenleme modalı (oyuncu bilgisi düzenle) -->
+<div id="playerEditModal" class="modal hidden" style="position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;z-index:999;">
+    <div style="background:#161b22;padding:25px;border-radius:15px;max-width:600px;width:90%;max-height:90%;overflow:auto;">
+        <span style="float:right;cursor:pointer;font-size:22px;" onclick="closeModal('playerEditModal')">×</span>
+        <div id="playerEditArea"></div>
+    </div>
 </div>
-
-
-<!-- ANA CONTAINER BİTİŞ -->
-
-
-
-
-
-<script type="module">
-
-
-// Firebase config buraya gelecek
-// Eski çalışan config'in varsa aynı kalacak
-
-
-import {
-
-initializeApp
-
-}
-
-from
-
-"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-
-
-
-import {
-
-getFirestore
-
-}
-
-from
-
-"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-
-
-
-
-const firebaseConfig = {
-
-
-    apiKey: "BURAYA_API_KEY",
-
-
-    authDomain: "BURAYA_AUTH_DOMAIN",
-
-
-    projectId: "BURAYA_PROJECT_ID",
-
-
-    storageBucket: "BURAYA_STORAGE_BUCKET",
-
-
-    messagingSenderId: "BURAYA_SENDER_ID",
-
-
-    appId: "BURAYA_APP_ID"
-
-
-
-};
-
-
-
-
-
-const app =
-initializeApp(firebaseConfig);
-
-
-
-
-
-const db =
-getFirestore(app);
-
-
-
-
-
-window.db = db;
-
-
-
-
-</script>
-
-
-
-
-
 
 
 <script type="module" src="app.js"></script>
 
-
-
-
 </body>
-
-
 </html>

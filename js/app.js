@@ -15,6 +15,7 @@ import {
     updateDoc,
     deleteDoc,
     doc,
+    setDoc,
     getDoc
 }
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -1732,5 +1733,92 @@ function createProfileStats(stats){
 
     })
     .join("");
+
+}
+window.saveTeam = async function(){
+
+
+    const name =
+    document.getElementById("teamName").value;
+
+
+    const logo =
+    document.getElementById("teamLogo").value;
+
+
+
+    if(!name){
+
+        alert("Takım adı gir");
+
+        return;
+
+    }
+
+
+
+    try{
+
+
+        await setDoc(
+
+            doc(
+                db,
+                "teams",
+                Date.now().toString()
+            ),
+
+            {
+
+                name:name,
+
+                logo:logo || "",
+
+                createdAt:
+                new Date(),
+
+                points:0,
+
+                wins:0,
+
+                draws:0,
+
+                losses:0,
+
+                goals:0,
+
+                conceded:0
+
+            }
+
+        );
+
+
+
+        alert(
+            "Takım oluşturuldu"
+        );
+
+
+
+        document.getElementById("teamName").value="";
+        document.getElementById("teamLogo").value="";
+
+
+
+        loadTeams();
+
+
+
+    }
+
+    catch(error){
+
+        alert(
+            error.message
+        );
+
+    }
+
 
 }

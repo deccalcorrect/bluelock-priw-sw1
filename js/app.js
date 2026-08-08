@@ -10,25 +10,25 @@ doc
 }
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+
 import {
 uploadPlayerImage
 }
 from "./cloudinary.js";
 
 
-// =====================
-// STAT EKLEME
-// =====================
+// =========================
+// STAT EKLE
+// =========================
 
 
-window.addStat = function(){
-
-let box =
-document.getElementById("statsContainer");
+window.addStat=function(){
 
 
-let div =
-document.createElement("div");
+const box=document.getElementById("statsContainer");
+
+
+const div=document.createElement("div");
 
 
 div.className="stat";
@@ -36,32 +36,33 @@ div.className="stat";
 
 div.innerHTML=`
 
-<input class="statName" placeholder="Stat">
+<input class="statName" placeholder="HIZ">
 
-<input 
-class="statValue"
-type="number"
-placeholder="90">
+<input class="statValue" type="number" placeholder="90">
 
 `;
 
 
 box.appendChild(div);
 
+
 };
 
 
 
+
+// =========================
+// FİZİKSEL STAT EKLE
+// =========================
 
 
 window.addPhysicalStat=function(){
 
-let box =
-document.getElementById("physicalContainer");
+
+const box=document.getElementById("physicalContainer");
 
 
-let div =
-document.createElement("div");
+const div=document.createElement("div");
 
 
 div.className="stat";
@@ -69,15 +70,11 @@ div.className="stat";
 
 div.innerHTML=`
 
-<input 
-class="physicalName"
-placeholder="Çeviklik">
+<input class="physicalName" placeholder="ÇEVİKLİK">
 
 
-<input
-class="physicalValue"
-type="number"
-placeholder="90">
+<input class="physicalValue" type="number" placeholder="90">
+
 
 `;
 
@@ -91,42 +88,46 @@ box.appendChild(div);
 
 
 
-// =====================
+// =========================
 // OYUNCU KAYDET
-// =====================
+// =========================
 
 
-window.savePlayer = async function(){
+window.savePlayer=async function(){
+
 
 
 let image="";
 
 
-let file =
-document.getElementById("playerImage").files[0];
+
+const file=
+document.getElementById("playerImage")
+.files[0];
+
 
 
 if(file){
 
-image =
+image=
 await uploadPlayerImage(file);
 
 }
 
 
 
+
 let stats={};
 
 
-document
-.querySelectorAll(".statName")
+
+document.querySelectorAll(".statName")
 .forEach((x,i)=>{
 
 
-let value =
-document
-.querySelectorAll(".statValue")[i]
-.value;
+let value=
+document.querySelectorAll(".statValue")[i].value;
+
 
 
 if(x.value){
@@ -146,15 +147,12 @@ let physical={};
 
 
 
-document
-.querySelectorAll(".physicalName")
+document.querySelectorAll(".physicalName")
 .forEach((x,i)=>{
 
 
-let value =
-document
-.querySelectorAll(".physicalValue")[i]
-.value;
+let value=
+document.querySelectorAll(".physicalValue")[i].value;
 
 
 
@@ -170,12 +168,10 @@ physical[x.value]=Number(value);
 
 
 
-
 await addDoc(
-
 collection(db,"players"),
-
 {
+
 
 name:
 document.getElementById("playerName").value,
@@ -217,47 +213,37 @@ stats:stats,
 physical:physical,
 
 
-
 goals:
-Number(
-document.getElementById("playerGoals").value
-)||0,
-
+Number(document.getElementById("playerGoals").value)||0,
 
 
 assists:
-Number(
-document.getElementById("playerAssists").value
-)||0
+Number(document.getElementById("playerAssists").value)||0
 
 
 }
+
 
 );
 
 
 
-alert("Oyuncu kaydedildi");
+alert("Oyuncu eklendi");
 
 
 loadPlayers();
 
 
 };
-
-
-
-
-
-// =====================
-// OYUNCU LİSTELE
-// =====================
+// =========================
+// OYUNCULARI GETİR
+// =========================
 
 
 async function loadPlayers(){
 
 
-let area =
+const area=
 document.getElementById("playersList");
 
 
@@ -270,7 +256,7 @@ area.innerHTML="";
 
 
 
-let snap =
+const snap=
 await getDocs(
 collection(db,"players")
 );
@@ -280,14 +266,14 @@ collection(db,"players")
 snap.forEach(d=>{
 
 
-let p=d.data();
+const p=d.data();
 
 
 
-area.innerHTML += `
-
+area.innerHTML+=`
 
 <div class="fm-card">
+
 
 
 <div class="fm-header">
@@ -295,8 +281,7 @@ area.innerHTML += `
 
 <img 
 class="fm-photo"
-src="${p.image || ''}">
-
+src="${p.image || 'https://via.placeholder.com/150'}">
 
 
 <div>
@@ -318,12 +303,7 @@ ${p.name}
 
 
 <p>
-⚽ ${p.goals || 0}
-Gol
-
-🅰️ ${p.assists || 0}
-Asist
-
+🎂 ${p.info?.age || "-"}
 </p>
 
 
@@ -333,12 +313,17 @@ Asist
 </div>
 
 
+
+
+
 <h3>
 ⚽ Oyuncu Statları
 </h3>
 
 
-${drawStats(p.stats)}
+${createStats(p.stats)}
+
+
 
 
 
@@ -347,7 +332,25 @@ ${drawStats(p.stats)}
 </h3>
 
 
-${drawStats(p.physical)}
+${createStats(p.physical)}
+
+
+
+
+
+
+<p>
+⚽ Gol:
+${p.goals || 0}
+</p>
+
+
+<p>
+🅰 Asist:
+${p.assists || 0}
+</p>
+
+
 
 
 
@@ -358,11 +361,13 @@ ${drawStats(p.physical)}
 </button>
 
 
+
 <button onclick="deletePlayer('${d.id}')">
 
 🗑 Sil
 
 </button>
+
 
 
 
@@ -375,56 +380,137 @@ ${drawStats(p.physical)}
 
 });
 
+
+
 }
-import { db } from "./firebase.js";
 
-import {
-collection,
-addDoc,
-getDocs,
-updateDoc,
-deleteDoc,
-doc
+
+
+
+
+
+
+
+// =========================
+// STAT BAR
+// =========================
+
+
+function createStats(stats){
+
+
+if(!stats)
+return "";
+
+
+
+return Object.entries(stats)
+
+.map(([name,value])=>{
+
+
+let color;
+
+
+if(value>=85){
+
+color="#22c55e";
+
 }
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-import {
-uploadPlayerImage
+else if(value>=70){
+
+color="#eab308";
+
 }
-from "./cloudinary.js";
+
+else{
+
+color="#ef4444";
+
+}
 
 
-// =====================
-// STAT EKLEME
-// =====================
+
+return `
 
 
-window.addStat = function(){
-
-let box =
-document.getElementById("statsContainer");
+<div class="attribute">
 
 
-let div =
-document.createElement("div");
+<div class="attribute-title">
+
+<span>
+${name}
+</span>
 
 
-div.className="stat";
+<b>
+${value}
+</b>
 
 
-div.innerHTML=`
+</div>
 
-<input class="statName" placeholder="Stat">
 
-<input 
-class="statValue"
-type="number"
-placeholder="90">
+
+<div class="bar">
+
+
+<div class="fill"
+
+style="
+width:${value}%;
+background:${color};
+">
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
 
 `;
 
 
-box.appendChild(div);
+})
+
+.join("");
+
+}
+
+
+
+
+
+
+
+// =========================
+// OYUNCU SİL
+// =========================
+
+
+window.deletePlayer=async function(id){
+
+
+
+if(!confirm("Oyuncu silinsin mi?"))
+return;
+
+
+
+await deleteDoc(
+doc(db,"players",id)
+);
+
+
+
+loadPlayers();
+
 
 };
 
@@ -432,35 +518,113 @@ box.appendChild(div);
 
 
 
-window.addPhysicalStat=function(){
-
-let box =
-document.getElementById("physicalContainer");
 
 
-let div =
-document.createElement("div");
+// =========================
+// OYUNCU DÜZENLE
+// =========================
 
 
-div.className="stat";
+window.editPlayer=async function(id){
 
 
-div.innerHTML=`
 
-<input 
-class="physicalName"
-placeholder="Çeviklik">
+let name=
+prompt("Yeni oyuncu adı:");
 
 
-<input
-class="physicalValue"
-type="number"
-placeholder="90">
 
-`;
+if(!name)
+return;
 
 
-box.appendChild(div);
+
+await updateDoc(
+
+doc(db,"players",id),
+
+{
+
+name:name
+
+}
+
+);
+
+
+
+loadPlayers();
+
+
+};
+// =========================
+// TAKIM EKLE
+// =========================
+
+
+window.addTeam = async function(){
+
+
+let name =
+document.getElementById("teamName").value;
+
+
+
+let logo =
+document.getElementById("teamLogo").value;
+
+
+
+
+if(!name){
+
+alert("Takım adı gir");
+
+return;
+
+}
+
+
+
+await addDoc(
+
+collection(db,"teams"),
+
+{
+
+
+name:name,
+
+
+logo:logo,
+
+
+points:0,
+
+
+played:0,
+
+
+wins:0,
+
+
+draws:0,
+
+
+losses:0
+
+
+}
+
+
+);
+
+
+
+alert("Takım oluşturuldu");
+
+
+loadTeams();
 
 
 };
@@ -469,49 +633,360 @@ box.appendChild(div);
 
 
 
-// =====================
-// OYUNCU KAYDET
-// =====================
 
 
-window.savePlayer = async function(){
+
+// =========================
+// TAKIMLAR
+// =========================
 
 
-let image="";
+async function loadTeams(){
 
 
-let file =
-document.getElementById("playerImage").files[0];
+
+let area =
+document.getElementById("teamsList");
 
 
-if(file){
 
-image =
-await uploadPlayerImage(file);
+if(!area)
+return;
+
+
+
+area.innerHTML="";
+
+
+
+let snap =
+await getDocs(
+collection(db,"teams")
+);
+
+
+
+snap.forEach(d=>{
+
+
+let t=d.data();
+
+
+
+area.innerHTML+=`
+
+<div class="fm-card">
+
+
+
+<img 
+
+src="${t.logo || ''}"
+
+style="
+width:80px;
+height:80px;
+object-fit:contain;
+">
+
+
+<h2>
+
+${t.name}
+
+</h2>
+
+
+
+<p>
+
+🏆 Puan:
+${t.points}
+
+</p>
+
+
+
+<p>
+
+🟢 Galibiyet:
+${t.wins}
+
+</p>
+
+
+
+<p>
+
+🟡 Beraberlik:
+${t.draws}
+
+</p>
+
+
+
+<p>
+
+🔴 Mağlubiyet:
+${t.losses}
+
+</p>
+
+
+
+</div>
+
+`;
+
+
+
+});
+
 
 }
+
+
+
+
+
+
+
+
+
+// =========================
+// GOL KRALLIĞI
+// =========================
+
+
+async function loadGoals(){
+
+
+let area=
+document.getElementById("goalList");
+
+
+if(!area)
+return;
+
+
+
+area.innerHTML="";
+
+
+
+let players=[];
+
+
+
+let snap=
+await getDocs(
+collection(db,"players")
+);
+
+
+
+snap.forEach(d=>{
+
+
+players.push(d.data());
+
+
+});
+
+
+
+players.sort(
+(a,b)=>
+(b.goals||0)-(a.goals||0)
+);
+
+
+
+players.forEach((p,i)=>{
+
+
+area.innerHTML+=`
+
+
+<div class="fm-card">
+
+
+<h3>
+
+${i+1}. ${p.name}
+
+</h3>
+
+
+<p>
+
+⚽ ${p.goals || 0} Gol
+
+</p>
+
+
+</div>
+
+
+`;
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// =========================
+// ASİST KRALLIĞI
+// =========================
+
+
+async function loadAssists(){
+
+
+let area=
+document.getElementById("assistList");
+
+
+
+if(!area)
+return;
+
+
+
+area.innerHTML="";
+
+
+
+let players=[];
+
+
+
+let snap=
+await getDocs(
+collection(db,"players")
+);
+
+
+
+snap.forEach(d=>{
+
+
+players.push(d.data());
+
+
+});
+
+
+
+players.sort(
+(a,b)=>
+(b.assists||0)-(a.assists||0)
+);
+
+
+
+players.forEach((p,i)=>{
+
+
+area.innerHTML+=`
+
+
+<div class="fm-card">
+
+
+<h3>
+
+${i+1}. ${p.name}
+
+</h3>
+
+
+<p>
+
+🅰 ${p.assists || 0} Asist
+
+</p>
+
+
+</div>
+
+
+`;
+
+
+
+});
+
+
+}
+
+
+
+
+
+
+
+
+
+// =========================
+// HIZLI STAT AKTAR
+// =========================
+
+
+window.transferStats=async function(){
+
+
+let id=
+document.getElementById("statPlayer").value;
+
+
+
+let text=
+document.getElementById("statText").value;
 
 
 
 let stats={};
 
 
-document
-.querySelectorAll(".statName")
-.forEach((x,i)=>{
+
+text
+.split("\n")
+.forEach(line=>{
 
 
-let value =
-document
-.querySelectorAll(".statValue")[i]
-.value;
+let parts=
+line.split(":");
 
 
-if(x.value){
 
-stats[x.value]=Number(value);
+if(parts.length===2){
+
+
+
+stats[
+parts[0].trim()
+]
+=
+Number(
+parts[1].trim()
+);
+
+
 
 }
+
 
 
 });
@@ -520,102 +995,24 @@ stats[x.value]=Number(value);
 
 
 
-let physical={};
+await updateDoc(
 
-
-
-document
-.querySelectorAll(".physicalName")
-.forEach((x,i)=>{
-
-
-let value =
-document
-.querySelectorAll(".physicalValue")[i]
-.value;
-
-
-
-if(x.value){
-
-physical[x.value]=Number(value);
-
-}
-
-
-});
-
-
-
-
-
-await addDoc(
-
-collection(db,"players"),
+doc(db,"players",id),
 
 {
 
-name:
-document.getElementById("playerName").value,
 
-
-image:image,
-
-
-info:{
-
-
-position:
-document.getElementById("playerPosition").value,
-
-
-team:
-document.getElementById("playerTeam").value,
-
-
-age:
-document.getElementById("playerAge").value,
-
-
-height:
-document.getElementById("playerHeight").value,
-
-
-weight:
-document.getElementById("playerWeight").value
-
-
-},
-
-
-
-stats:stats,
-
-
-physical:physical,
-
-
-
-goals:
-Number(
-document.getElementById("playerGoals").value
-)||0,
-
-
-
-assists:
-Number(
-document.getElementById("playerAssists").value
-)||0
+stats:stats
 
 
 }
+
 
 );
 
 
 
-alert("Oyuncu kaydedildi");
+alert("Statlar aktarıldı");
 
 
 loadPlayers();
@@ -627,130 +1024,18 @@ loadPlayers();
 
 
 
-// =====================
-// OYUNCU LİSTELE
-// =====================
 
 
-async function loadPlayers(){
 
+// =========================
+// BAŞLAT
+// =========================
 
-let area =
-document.getElementById("playersList");
 
+loadPlayers();
 
-if(!area)
-return;
+loadTeams();
 
+loadGoals();
 
-
-area.innerHTML="";
-
-
-
-let snap =
-await getDocs(
-collection(db,"players")
-);
-
-
-
-snap.forEach(d=>{
-
-
-let p=d.data();
-
-
-
-area.innerHTML += `
-
-
-<div class="fm-card">
-
-
-<div class="fm-header">
-
-
-<img 
-class="fm-photo"
-src="${p.image || ''}">
-
-
-
-<div>
-
-
-<h2>
-${p.name}
-</h2>
-
-
-<p>
-📍 ${p.info?.position || "-"}
-</p>
-
-
-<p>
-🏟 ${p.info?.team || "-"}
-</p>
-
-
-<p>
-⚽ ${p.goals || 0}
-Gol
-
-🅰️ ${p.assists || 0}
-Asist
-
-</p>
-
-
-</div>
-
-
-</div>
-
-
-<h3>
-⚽ Oyuncu Statları
-</h3>
-
-
-${drawStats(p.stats)}
-
-
-
-<h3>
-💪 Fiziksel Statlar
-</h3>
-
-
-${drawStats(p.physical)}
-
-
-
-<button onclick="editPlayer('${d.id}')">
-
-✏️ Düzenle
-
-</button>
-
-
-<button onclick="deletePlayer('${d.id}')">
-
-🗑 Sil
-
-</button>
-
-
-
-</div>
-
-
-`;
-
-
-
-});
-
-}
+loadAssists();

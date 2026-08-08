@@ -670,7 +670,32 @@ snap.forEach(d=>{
 
 
 let t=d.data();
+let players=[];
 
+
+let playerSnap =
+await getDocs(
+collection(db,"players")
+);
+
+
+
+playerSnap.forEach(p=>{
+
+
+let player =
+p.data();
+
+
+
+if(player.info?.team === t.name){
+
+players.push(player.name);
+
+}
+
+
+});
 
 
 area.innerHTML+=`
@@ -731,6 +756,30 @@ ${t.draws}
 ${t.losses}
 
 </p>
+<h3>
+👥 Kadro
+</h3>
+
+
+${
+
+players.length
+
+?
+
+players.map(x=>`
+
+<p>
+⚽ ${x}
+</p>
+
+`).join("")
+
+:
+
+"<p>Kadro boş</p>"
+
+}
 
 
 

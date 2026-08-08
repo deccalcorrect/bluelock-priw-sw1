@@ -120,13 +120,50 @@ name:name,
 
 image:image,
 
+
+info:{
+
+
+position:
+document.getElementById("playerPosition").value,
+
+
+team:
+document.getElementById("playerTeam").value,
+
+
+age:
+document.getElementById("playerAge").value,
+
+
+height:
+document.getElementById("playerHeight").value,
+
+
+weight:
+document.getElementById("playerWeight").value
+
+
+},
+
+
+
 stats:stats,
 
-goals:0,
 
-assists:0,
 
-team:""
+goals:
+Number(
+document.getElementById("playerGoals").value
+) || 0,
+
+
+
+assists:
+Number(
+document.getElementById("playerAssists").value
+) || 0
+
 
 }
 
@@ -201,6 +238,19 @@ area.innerHTML +=`
 
 <div class="player-card">
 
+<div class="stats-box">
+
+<h4>Performans</h4>
+
+<p>
+⚽ ${p.goals || 0} Gol
+</p>
+
+<p>
+🅰️ ${p.assists || 0} Asist
+</p>
+
+</div>
 
 <img src="${p.image || ''}">
 
@@ -211,8 +261,30 @@ ${p.name}
 
 
 <p>
-Takım:
-${p.team || "Yok"}
+📍 ${p.info?.position || "Pozisyon Yok"}
+</p>
+
+
+<p>
+🏟 ${p.info?.team || "Takım Yok"}
+</p>
+
+
+<p>
+🎂 Yaş:
+${p.info?.age || "-"}
+</p>
+
+
+<p>
+📏 Boy:
+${p.info?.height || "-"}
+</p>
+
+
+<p>
+⚖️ Kilo:
+${p.info?.weight || "-"}
 </p>
 
 

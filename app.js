@@ -106,6 +106,7 @@ const state = {
     currentPlayerId: null,
     currentTeamId: null,
     currentMatchId: null,
+    currentMatchDetailId: null,
     allMatches: []
 };
 
@@ -211,6 +212,7 @@ const PAGE_TITLES = {
     league: "Lig",
     matchResults: "Maç Sonuçları",
     matchControl: "Maç Kontrolü",
+    matchDetail: "Maç Detayı",
     addPlayer: "Oyuncu Ekle",
     addTeam: "Takım Ekle",
     admin: "Admin Paneli"
@@ -1186,9 +1188,9 @@ window.loadMatches = async function () {
     }
 
     area.innerHTML = matches.map(match => `
-        <div class="leagueRow" style="background:#111827;padding:12px 16px;border-radius:10px;margin:5px 0;display:flex;justify-content:space-between;align-items:center;">
+        <div class="leagueRow" style="background:#111827;padding:12px 16px;border-radius:10px;margin:5px 0;display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="openMatchDetail('${match.id}')">
             <strong>${escapeHtml(match.homeName)} ${match.homeGoals} - ${match.awayGoals} ${escapeHtml(match.awayName)}</strong>
-            ${isAdmin ? `<button class="btn danger small" onclick="deleteMatch('${match.id}')">Sil</button>` : ""}
+            ${isAdmin ? `<button class="btn danger small" onclick="event.stopPropagation();deleteMatch('${match.id}')">Sil</button>` : ""}
         </div>
     `).join("");
 };
@@ -1231,6 +1233,11 @@ function startMatchesListener() {
         if (state.currentMatchId) {
             const current = matches.find(m => m.id === state.currentMatchId);
             if (current) renderMatchControl(current);
+        }
+
+        if (state.currentMatchDetailId) {
+            const current = matches.find(m => m.id === state.currentMatchDetailId);
+            if (current) renderMatchDetail(current);
         }
     }, (error) => {
         console.error("Maç dinleyici hatası:", error);
@@ -1280,7 +1287,7 @@ window.renderLiveMatches = function (containerId) {
         const timeline = events.length ? events.map(ev => renderEventLine(ev)).join("") : `<div class="capNote">Henüz olay yok.</div>`;
 
         return `
-        <div class="fm-card" style="margin-bottom:18px;border-color:#dc2626;">
+        <div class="fm-card" style="margin-bottom:18px;border-color:#dc2626;cursor:pointer;" onclick="openMatchDetail('${match.id}')">
             <div class="fm-header" style="justify-content:space-between;">
                 <div class="fm-info">
                     <h2 style="display:flex;align-items:center;gap:10px;">
@@ -1288,7 +1295,7 @@ window.renderLiveMatches = function (containerId) {
                     </h2>
                     <h3>${escapeHtml(match.homeName)} <span style="color:#fff;font-size:22px;">${match.homeGoals ?? 0} - ${match.awayGoals ?? 0}</span> ${escapeHtml(match.awayName)}</h3>
                 </div>
-                ${isAdmin ? `<button class="btn" onclick="openMatchControl('${match.id}')">Maçı Yönet</button>` : ""}
+                ${isAdmin ? `<button class="btn" onclick="event.stopPropagation();openMatchControl('${match.id}')">Maçı Yönet</button>` : ""}
             </div>
             <div class="attribute-section">
                 <h3>Dakika Dakika</h3>
@@ -1407,6 +1414,53 @@ async function renderMatchControl(match) {
     window._matchControlPlayers = { home: homePlayers, away: awayPlayers, all: allPlayers, match };
 
     renderEventForm(match.id);
+}
+
+window.openMatchDetail = function (matchId) {
+    state.currentMatchDetailId = matchId;
+    window.currentMatchDetailId = matchId;
+
+    const match = (state.allMatches || []).find(m => m.id === matchId);
+
+    if (match) {
+        renderMatchDetail(match);
+        showPage("matchDetail");
+    } else {
+        // state.allMatches sadece dinlenen koleksiyonu tutar; olası gecikme
+        // durumunda tek seferlik oku.
+        getDoc(doc(db, "matches", matchId)).then(snap => {
+            if (!snap.exists()) { alert("Maç bulunamadı"); return; }
+            renderMatchDetail({ id: matchId, ...snap.data() });
+            showPage("matchDetail");
+        });
+    }
+};
+
+function renderMatchDetail(match) {
+    const area = document.getElementById("matchDetailArea");
+    if (!area) return;
+
+    const events = (match.events || []).slice().sort((a, b) => (a.minute || 0) - (b.minute || 0));
+    const isLive = match.status === "live";
+
+    area.innerHTML = `
+    <div class="fm-card" ${isLive ? 'style="border-color:#dc2626;"' : ""}>
+        <div class="fm-header" style="justify-content:space-between;">
+            <div class="fm-info">
+                <h2 style="display:flex;align-items:center;gap:10px;">
+                    ${isLive ? `<span class="liveDot"></span> CANLI` : "SONA ERDİ"}
+                </h2>
+                <h3>${escapeHtml(match.homeName)} <span style="color:#fff;font-size:22px;">${match.homeGoals ?? 0} - ${match.awayGoals ?? 0}</span> ${escapeHtml(match.awayName)}</h3>
+            </div>
+            ${isAdmin && isLive ? `<button class="btn" onclick="openMatchControl('${match.id}')">Maçı Yönet</button>` : ""}
+        </div>
+
+        <div class="attribute-section">
+            <h3>Dakika Dakika</h3>
+            ${events.length ? events.map(ev => renderEventLine(ev)).join("") : `<div class="capNote">Bu maçta henüz olay kaydedilmedi.</div>`}
+        </div>
+    </div>
+    `;
 }
 
 async function getPlayersByTeam(teamId) {
@@ -1707,10 +1761,10 @@ window.renderRecentMatches = async function () {
     const rows = matches.slice(0, 5).map(m => {
         const date = m.createdAt?.toDate ? m.createdAt.toDate().toLocaleDateString("tr-TR") : "-";
         return `
-        <tr>
+        <tr onclick="openMatchDetail('${m.id}')" style="cursor:pointer;">
             <td>${date}</td>
             <td>${escapeHtml(m.homeName)} - ${escapeHtml(m.awayName)}</td>
-            <td><strong>${m.homeGoals} - ${m.awayGoals}</strong></td>
+            <td><strong>${m.homeGoals} - ${m.awayGoals}</strong>${m.status === "live" ? ` 🔴` : ""}</td>
         </tr>
         `;
     });

@@ -7,14 +7,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<title>Bluelock Priw SW</title>
 
-<title>
-Oyuncu Stat Paneli
-</title>
-
-
-<link rel="stylesheet" href="style.css">
-
+<link rel="stylesheet" href="css/style.css">
 
 </head>
 
@@ -22,37 +17,228 @@ Oyuncu Stat Paneli
 <body>
 
 
-<header>
+<div class="layout">
+
+
+
+<!-- =========================
+SOL MENÜ
+========================= -->
+
+
+<aside class="sidebar">
+
 
 <h1>
-⚽ Oyuncu Stat Paneli
+⚽ BLUEL0CK
 </h1>
+
+
+<p class="league">
+Priw SW
+</p>
+
+
+
+
+<button onclick="openPage('home')">
+🏠 Ana Sayfa
+</button>
+
+
+
+<button onclick="openPage('players')">
+👥 Oyuncular
+</button>
+
+
+
+<button onclick="openPage('teams')">
+🏟 Takımlar
+</button>
+
+
+
+<button onclick="openPage('table')">
+🏆 Puan Durumu
+</button>
+
+
+
+<button onclick="openPage('goals')">
+⚽ Gol Krallığı
+</button>
+
+
+
+<button onclick="openPage('assists')">
+🅰 Asist Krallığı
+</button>
+
+
+
+<button onclick="openPage('stats')">
+⚡ Hızlı Stat Aktar
+</button>
+
+
+
+<button onclick="openPage('settings')">
+⚙ Ayarlar
+</button>
+
+
+
+</aside>
+
+
+
+
+
+
+<!-- =========================
+ANA İÇERİK
+========================= -->
+
+
+<main class="content">
+
+
+
+<header class="topbar">
+
+
+<h2>
+Bluelock Priw SW
+</h2>
+
+
+<div>
+Sezon: 2026
+</div>
+
 
 </header>
 
 
 
-<main>
-
 
 
 <!-- =========================
-OYUNCU PANELİ
+ANA SAYFA
 ========================= -->
 
 
-<section class="panel">
+<section 
+id="home"
+class="page">
 
 
 <h2>
-Oyuncu Oluştur
+Lig Merkezi
 </h2>
 
 
 
-<input 
+<div class="cards">
+
+
+
+<div class="box">
+
+<h3>
+Takımlar
+</h3>
+
+
+<p id="teamCount">
+0
+</p>
+
+
+</div>
+
+
+
+
+<div class="box">
+
+<h3>
+Oyuncular
+</h3>
+
+
+<p id="playerCount">
+0
+</p>
+
+
+</div>
+
+
+
+
+
+<div class="box">
+
+<h3>
+Maçlar
+</h3>
+
+
+<p>
+0
+</p>
+
+
+</div>
+
+
+
+</div>
+
+
+
+</section>
+
+
+
+
+<!-- =========================
+OYUNCULAR
+========================= -->
+
+
+<section 
+id="players"
+class="page hidden">
+
+
+<h2>
+👥 Oyuncular
+</h2>
+
+
+
+
+
+<!-- OYUNCU OLUŞTUR -->
+
+<div class="createBox">
+
+
+<h3>
+Yeni Oyuncu Oluştur
+</h3>
+
+
+
+
+<input
 id="playerName"
 placeholder="Oyuncu adı">
+
+
 
 
 
@@ -61,12 +247,23 @@ Oyuncu Fotoğrafı
 </label>
 
 
+
 <input
+
 type="file"
+
 id="playerImage"
+
 accept="image/*"
+
 >
 
+
+
+
+
+
+<div class="playerInfo">
 
 
 
@@ -94,27 +291,34 @@ placeholder="Kilo">
 
 
 
-
-
 <input
 id="playerGoals"
 type="number"
-placeholder="Gol"
->
+placeholder="Gol">
 
 
 
 <input
 id="playerAssists"
 type="number"
-placeholder="Asist"
->
+placeholder="Asist">
+
+
+
+</div>
+
+
+
+
+
 
 
 
 <h3>
 Normal Statlar
 </h3>
+
+
 
 
 <div id="statsContainer">
@@ -133,9 +337,12 @@ Normal Statlar
 
 
 
+
+
 <h3>
 Fiziksel Özellikler
 </h3>
+
 
 
 
@@ -156,13 +363,17 @@ Fiziksel Özellikler
 
 
 
+
+
 <h3>
 Takım Seç
 </h3>
 
 
 
+
 <select id="playerTeam">
+
 
 <option value="">
 
@@ -177,7 +388,6 @@ Takım seç
 
 
 
-<br><br>
 
 
 
@@ -189,54 +399,8 @@ Oyuncuyu Kaydet
 
 
 
-</section>
 
-
-
-
-<!-- =========================
-TAKIM OLUŞTURMA
-========================= -->
-
-
-<section class="panel">
-
-
-<h2>
-🏟️ Takım Oluştur
-</h2>
-
-
-
-<input
-
-id="teamName"
-
-placeholder="Takım adı"
-
->
-
-
-
-<input
-
-id="teamLogo"
-
-placeholder="Logo URL"
-
->
-
-
-
-<button onclick="addTeam()">
-
-Takım Ekle
-
-</button>
-
-
-
-</section>
+</div>
 
 
 
@@ -244,26 +408,21 @@ Takım Ekle
 
 
 
+<hr>
 
 
-<!-- =========================
-OYUNCULAR
-========================= -->
 
 
-<section class="panel">
 
-
-<h2>
-👤 Oyuncular
-</h2>
-
+<!-- OYUNCU LİSTESİ -->
 
 
 <div id="playersList">
 
 
 </div>
+
+
 
 
 
@@ -282,12 +441,80 @@ TAKIMLAR
 ========================= -->
 
 
-<section class="panel">
+<section 
+id="teams"
+class="page hidden">
+
 
 
 <h2>
-🏆 Takımlar
+🏟 Takımlar
 </h2>
+
+
+
+
+
+
+
+<!-- TAKIM OLUŞTUR -->
+
+
+<div class="createBox">
+
+
+<h3>
+Yeni Takım Oluştur
+</h3>
+
+
+
+
+
+<input
+
+id="teamName"
+
+placeholder="Takım adı"
+
+>
+
+
+
+
+
+<input
+
+id="teamLogo"
+
+placeholder="Logo URL"
+
+>
+
+
+
+
+
+<button onclick="addTeam()">
+
+Takım Ekle
+
+</button>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+<hr>
+
+
 
 
 
@@ -298,7 +525,95 @@ TAKIMLAR
 
 
 
+
+
 </section>
+
+
+
+
+
+<!-- =========================
+PUAN DURUMU
+========================= -->
+
+
+<section 
+id="table"
+class="page hidden">
+
+
+<h2>
+🏆 Puan Durumu
+</h2>
+
+
+
+
+<table>
+
+
+<thead>
+
+<tr>
+
+<th>
+Takım
+</th>
+
+
+<th>
+Puan
+</th>
+
+
+<th>
+O
+</th>
+
+
+<th>
+G
+</th>
+
+
+<th>
+B
+</th>
+
+
+<th>
+M
+</th>
+
+
+</tr>
+
+
+</thead>
+
+
+
+
+
+<tbody id="tableList">
+
+
+</tbody>
+
+
+
+</table>
+
+
+
+
+</section>
+
+
+
+
+
 
 
 
@@ -309,12 +624,15 @@ GOL KRALLIĞI
 ========================= -->
 
 
-<section class="panel">
+<section 
+id="goals"
+class="page hidden">
 
 
 <h2>
 ⚽ Gol Krallığı
 </h2>
+
 
 
 
@@ -340,12 +658,15 @@ ASİST KRALLIĞI
 ========================= -->
 
 
-<section class="panel">
+<section 
+id="assists"
+class="page hidden">
 
 
 <h2>
-🅰️ Asist Krallığı
+🅰 Asist Krallığı
 </h2>
+
 
 
 
@@ -367,16 +688,31 @@ ASİST KRALLIĞI
 
 
 <!-- =========================
-ADMIN STAT GÜNCELLEME
+HIZLI STAT AKTAR
 ========================= -->
 
 
-<section class="panel">
+<section 
+id="stats"
+class="page hidden">
 
 
 <h2>
-🔒 Admin Stat Güncelleme
+⚡ Hızlı Stat Aktar
 </h2>
+
+
+
+
+
+<p>
+
+Sadece admin kullanabilir.
+
+</p>
+
+
+
 
 
 
@@ -385,7 +721,9 @@ ADMIN STAT GÜNCELLEME
 
 <option value="">
 
-Oyuncu seç
+
+Oyuncu Seç
+
 
 </option>
 
@@ -396,18 +734,17 @@ Oyuncu seç
 
 
 
+
+
+
 <textarea
 
 id="statText"
 
-placeholder="
-Örnek:
-
-Hız:90
-Şut:85
-Pas:88
-
-"
+placeholder="Hız:90
+Pas:85
+Şut:88
+Çeviklik:80"
 
 ></textarea>
 
@@ -415,11 +752,20 @@ Pas:88
 
 
 
-<button onclick="transferStats()">
 
-Statları Aktar
+
+<button
+
+onclick="transferStats()"
+
+>
+
+Aktar
+
 
 </button>
+
+
 
 
 
@@ -433,19 +779,126 @@ Statları Aktar
 
 
 
+
+
+
+<!-- =========================
+AYARLAR
+========================= -->
+
+
+<section
+
+id="settings"
+
+class="page hidden"
+
+
+
+>
+
+
+<h2>
+
+⚙ Ayarlar
+
+</h2>
+
+
+
+<p>
+
+Lig sistemi ayarları
+
+</p>
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </main>
 
 
 
+</div>
 
 
 
 
 
-<script 
-type="module"
-src="./App.js">
+
+
+
+
+
+
+
+
+<script>
+
+
+function openPage(id){
+
+
+
+document
+
+.querySelectorAll(".page")
+
+.forEach(
+
+page =>
+
+page.classList.add("hidden")
+
+);
+
+
+
+
+
+
+document
+
+.getElementById(id)
+
+.classList.remove("hidden");
+
+
+
+}
+
+
+
 </script>
+
+
+
+
+
+
+<script
+
+type="module"
+
+src="js/app.js"
+
+></script>
+
+
 
 
 

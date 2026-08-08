@@ -4655,3 +4655,900 @@ window.getPermission = function(){
 console.log(
     "BLUELOCK FINAL APP.JS YÜKLENDİ"
 );
+// =====================================
+// FINAL APP FIX 11/12
+// EKSİK TEMEL FONKSİYONLAR
+// =====================================
+
+
+
+// =====================================
+// VALUE YARDIMCI FONKSİYONU
+// =====================================
+
+
+window.value = function(id){
+
+    const el =
+    document.getElementById(id);
+
+
+    return el ? el.value : "";
+
+};
+
+
+
+
+
+
+
+
+
+// =====================================
+// ADMIN KONTROL
+// =====================================
+
+
+
+window.isAdmin =
+window.isAdmin || false;
+
+
+
+function checkAdmin(){
+
+
+    const params =
+    new URLSearchParams(
+        window.location.search
+    );
+
+
+
+    if(
+        params.get("admin")
+        ===
+        "bluelock2026"
+    ){
+
+
+        window.isAdmin = true;
+
+
+    }
+
+
+
+}
+
+
+
+checkAdmin();
+
+
+
+
+
+
+
+
+
+// =====================================
+// OYUNCU KAYDET
+// =====================================
+
+
+
+window.savePlayer = async function(){
+
+
+
+    const name =
+    value(
+        "playerName"
+    );
+
+
+
+    if(!name){
+
+
+        alert(
+            "Oyuncu adı gerekli"
+        );
+
+
+        return;
+
+
+    }
+
+
+
+
+
+
+    let imageURL = "";
+
+
+
+    const fileInput =
+    document.getElementById(
+        "playerImage"
+    );
+
+
+
+    if(
+        fileInput &&
+        fileInput.files[0]
+    ){
+
+
+        // Storage bağlantısı varsa burası çalışacak
+        // Yoksa boş geçecek
+
+
+        try{
+
+
+            const file =
+            fileInput.files[0];
+
+
+
+            const storageRef =
+            ref(
+                storage,
+                "players/"
+                +
+                Date.now()
+                +
+                "_"
+                +
+                file.name
+            );
+
+
+
+            await uploadBytes(
+                storageRef,
+                file
+            );
+
+
+
+            imageURL =
+            await getDownloadURL(
+                storageRef
+            );
+
+
+        }
+
+        catch(e){
+
+
+            console.log(
+                "Fotoğraf yüklenemedi",
+                e
+            );
+
+
+        }
+
+
+    }
+
+
+
+
+
+
+
+
+
+    await addDoc(
+
+        collection(
+            db,
+            "players"
+        ),
+
+
+        {
+
+
+            name:name,
+
+
+            image:imageURL,
+
+
+
+            team:value(
+                "playerTeam"
+            ),
+
+
+
+            info:{
+
+
+                position:
+                value(
+                    "playerPosition"
+                ),
+
+
+                age:
+                value(
+                    "playerAge"
+                ),
+
+
+                height:
+                value(
+                    "playerHeight"
+                ),
+
+
+                weight:
+                value(
+                    "playerWeight"
+                )
+
+
+            },
+
+
+
+            goals:0,
+
+
+            assists:0,
+
+
+            matches:0,
+
+
+
+            createdAt:
+            new Date()
+
+
+
+        }
+
+
+    );
+
+
+
+
+
+
+    alert(
+        "Oyuncu kaydedildi"
+    );
+
+
+
+    loadPlayers();
+
+
+
+    updateDashboard();
+
+
+
+};
+
+
+
+
+
+
+
+
+
+// =====================================
+// DASHBOARD SAYACLARI
+// =====================================
+
+
+
+window.updateDashboard =
+async function(){
+
+
+
+    const playerSnap =
+    await getDocs(
+
+        collection(
+            db,
+            "players"
+        )
+
+    );
+
+
+
+    const teamSnap =
+    await getDocs(
+
+        collection(
+            db,
+            "teams"
+        )
+
+    );
+
+
+
+
+
+    const playerCount =
+    document.getElementById(
+        "playerCount"
+    );
+
+
+
+    const teamCount =
+    document.getElementById(
+        "teamCount"
+    );
+
+
+
+
+
+    if(playerCount){
+
+
+        playerCount.innerHTML =
+        playerSnap.size;
+
+
+    }
+
+
+
+
+    if(teamCount){
+
+
+        teamCount.innerHTML =
+        teamSnap.size;
+
+
+    }
+
+
+
+
+
+
+    const perm =
+    document.getElementById(
+        "permissionText"
+    );
+
+
+
+    if(perm){
+
+
+        perm.innerHTML =
+
+        window.isAdmin
+
+        ?
+
+        "Admin"
+
+        :
+
+        "Ziyaretçi";
+
+
+    }
+
+
+
+};
+// =====================================
+// FINAL APP FIX 12/12
+// SON BAĞLANTILAR VE EKSİK FONKSİYONLAR
+// =====================================
+
+
+
+// =====================================
+// TAKIM KAYDET
+// =====================================
+
+
+
+window.saveTeam = async function(){
+
+
+
+    const name =
+    value(
+        "teamName"
+    );
+
+
+
+    const logo =
+    value(
+        "teamLogo"
+    );
+
+
+
+    if(!name){
+
+
+        alert(
+            "Takım adı gerekli"
+        );
+
+
+        return;
+
+
+    }
+
+
+
+
+
+
+    await addDoc(
+
+
+        collection(
+            db,
+            "teams"
+        ),
+
+
+        {
+
+
+            name:name,
+
+
+            logo:logo,
+
+
+            points:0,
+
+
+            wins:0,
+
+
+            draws:0,
+
+
+            losses:0,
+
+
+            goals:0,
+
+
+            conceded:0,
+
+
+
+            createdAt:
+            new Date()
+
+
+
+        }
+
+
+    );
+
+
+
+
+
+
+    alert(
+        "Takım oluşturuldu"
+    );
+
+
+
+    loadTeams();
+
+
+    loadTeamSelect();
+
+
+    updateDashboard();
+
+
+
+};
+
+
+
+
+
+
+
+
+
+// =====================================
+// OYUNCU DÜZENLEME PANELİ
+// =====================================
+
+
+
+window.editPlayer = async function(id){
+
+
+
+    const modal =
+    document.getElementById(
+        "playerEditModal"
+    );
+
+
+
+    const area =
+    document.getElementById(
+        "playerEditArea"
+    );
+
+
+
+    if(!modal || !area)
+    return;
+
+
+
+
+
+    const snap =
+    await getDoc(
+
+        doc(
+            db,
+            "players",
+            id
+        )
+
+    );
+
+
+
+    if(!snap.exists())
+    return;
+
+
+
+
+    const p =
+    snap.data();
+
+
+
+
+    window.currentPlayerId =
+    id;
+
+
+
+
+
+    area.innerHTML = `
+
+
+
+    <h2>
+    ${p.name}
+    Düzenle
+    </h2>
+
+
+
+    <input
+
+    id="editPlayerName"
+
+    value="${p.name || ""}"
+
+    >
+
+
+
+    <input
+
+    id="editPlayerPosition"
+
+    value="${p.info?.position || ""}"
+
+    >
+
+
+
+    <input
+
+    id="editPlayerAge"
+
+    value="${p.info?.age || ""}"
+
+    >
+
+
+
+
+    <button onclick="savePlayerEdit('${id}')">
+
+    Kaydet
+
+    </button>
+
+
+
+    `;
+
+
+
+
+
+    modal.style.display =
+    "flex";
+
+
+
+};
+
+
+
+
+
+
+
+
+
+window.savePlayerEdit =
+async function(id){
+
+
+
+    await updateDoc(
+
+
+        doc(
+            db,
+            "players",
+            id
+        ),
+
+
+
+        {
+
+
+            name:
+            value(
+                "editPlayerName"
+            ),
+
+
+
+            info:{
+
+
+                position:
+                value(
+                    "editPlayerPosition"
+                ),
+
+
+
+                age:
+                value(
+                    "editPlayerAge"
+                )
+
+
+            }
+
+
+
+        }
+
+
+    );
+
+
+
+
+
+
+    alert(
+        "Oyuncu güncellendi"
+    );
+
+
+
+    closeModal(
+        "playerEditModal"
+    );
+
+
+
+    loadPlayers();
+
+
+
+};
+
+
+
+
+
+
+
+
+
+// =====================================
+// BLUELOCK KART RENDER
+// =====================================
+
+
+
+window.renderPlayerCard =
+function(player){
+
+
+
+    const area =
+    document.getElementById(
+        "playerCardPreview"
+    );
+
+
+
+    if(!area)
+    return;
+
+
+
+
+
+
+    const rating =
+    calculateRating(
+        player
+    );
+
+
+
+
+
+    area.innerHTML += `
+
+
+
+    <div class="card">
+
+
+
+    <img src="${player.image || ''}">
+
+
+
+    <h2>
+
+    ${player.name}
+
+    </h2>
+
+
+
+    <h1>
+
+    ${rating}
+
+    ⭐
+
+    </h1>
+
+
+
+
+    <p>
+
+    ⚽ ${player.goals || 0}
+
+    |
+
+    🅰️ ${player.assists || 0}
+
+    </p>
+
+
+
+
+    <p>
+
+    ${player.info?.position || "-"}
+
+    </p>
+
+
+
+    </div>
+
+
+
+    `;
+
+
+
+};
+
+
+
+
+
+
+
+
+
+// =====================================
+// GENEL YENİLEME
+// =====================================
+
+
+
+window.refreshAll =
+async function(){
+
+
+
+    await loadPlayers();
+
+
+
+    await loadTeams();
+
+
+
+    await loadLeagueTable();
+
+
+
+    await loadMatches();
+
+
+
+    await updateDashboard();
+
+
+
+};
+
+
+
+
+
+
+
+
+
+console.log(
+"BLUELOCK FINAL FIX 12/12 TAMAMLANDI"
+);

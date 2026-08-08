@@ -38,14 +38,11 @@ appId:
 
 
 
-const app =
-initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig);
 
+export const db = getFirestore(app);
 
-
-export const db =
-getFirestore(app);
-
+export { app };
 
 
 export const auth =

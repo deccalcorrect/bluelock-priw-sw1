@@ -453,7 +453,9 @@ window.savePlayer = async function () {
 
         await addDoc(collection(db, "players"), player);
 
-        alert("Oyuncu eklendi");
+        alert(player.image
+            ? "Oyuncu eklendi (fotoğraf yüklendi ✅)"
+            : "Oyuncu eklendi (fotoğraf yüklenMEDİ — dosya seçilmemiş ya da yükleme başarısız oldu)");
         clear("playerName");
         clear("playerPosition");
         clear("playerAge");

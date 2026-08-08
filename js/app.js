@@ -52,12 +52,17 @@ const state = {
 
 const urlParams = new URLSearchParams(window.location.search);
 const urlAdmin = urlParams.get("admin") === ADMIN_PASSWORD;
+
+// Özel admin linki: .../adminkemal (klasör veya son parça olarak)
+const pathParts = window.location.pathname.split("/").filter(Boolean);
+const pathAdmin = pathParts[pathParts.length - 1] === "adminkemal";
+
 const storedAdmin = localStorage.getItem("bluelockAdmin") === "1";
 
-let isAdmin = urlAdmin || storedAdmin;
+let isAdmin = urlAdmin || pathAdmin || storedAdmin;
 window.isAdmin = isAdmin;
 
-if (urlAdmin && !storedAdmin) {
+if ((urlAdmin || pathAdmin) && !storedAdmin) {
     localStorage.setItem("bluelockAdmin", "1");
 }
 
@@ -139,6 +144,7 @@ const PAGE_TITLES = {
     teams: "Takımlar",
     teamDetail: "Takım Detayı",
     league: "Lig",
+    matchResults: "Maç Sonuçları",
     addPlayer: "Oyuncu Ekle",
     addTeam: "Takım Ekle",
     admin: "Admin Paneli"
@@ -160,7 +166,8 @@ window.showPage = function (pageId) {
     // Sayfaya girerken ilgili veriyi tazele
     if (pageId === "players") loadPlayers();
     if (pageId === "teams") loadTeams();
-    if (pageId === "league") { loadLeagueTable(); loadMatches(); loadMatchTeams(); }
+    if (pageId === "league") { loadLeagueTable(); }
+    if (pageId === "matchResults") { loadMatches(); loadMatchTeams(); }
     if (pageId === "addPlayer") { loadTeamSelect(); renderCoreStatInputs(); }
     if (pageId === "admin") renderAdminPage();
 };
@@ -1014,7 +1021,14 @@ window.loadMatches = async function () {
 
     const snap = await getDocs(collection(db, "matches"));
     const matches = [];
-    snap.forEach(item => matches.push(item.data()));
+    snap.forEach(item => matches.push({ id: item.id, ...item.data() }));
+
+    // en yeni maç en üstte
+    matches.sort((a, b) => {
+        const ta = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+        const tb = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+        return tb - ta;
+    });
 
     if (!matches.length) {
         area.innerHTML = `<div class="forum-empty">Henüz maç oynanmadı.</div>`;
@@ -1022,10 +1036,25 @@ window.loadMatches = async function () {
     }
 
     area.innerHTML = matches.map(match => `
-        <div class="leagueRow" style="background:#111827;padding:12px;border-radius:10px;margin:5px 0;">
+        <div class="leagueRow" style="background:#111827;padding:12px 16px;border-radius:10px;margin:5px 0;display:flex;justify-content:space-between;align-items:center;">
             <strong>${escapeHtml(match.homeName)} ${match.homeGoals} - ${match.awayGoals} ${escapeHtml(match.awayName)}</strong>
+            ${isAdmin ? `<button class="btn danger small" onclick="deleteMatch('${match.id}')">Sil</button>` : ""}
         </div>
     `).join("");
+};
+
+window.deleteMatch = async function (id) {
+    if (!isAdmin) { alert("Yetkin yok"); return; }
+
+    const ok = confirm(
+        "Bu maç sonucu geçmişten silinsin mi?\n\n" +
+        "Not: Bu işlem takımların Puan/Galibiyet/Gol istatistiklerini otomatik olarak geri almaz. " +
+        "Gerekirse ilgili takımların istatistiklerini Takım Detayı sayfasından elle düzelt."
+    );
+    if (!ok) return;
+
+    await deleteDoc(doc(db, "matches", id));
+    loadMatches();
 };
 
 

@@ -8,7 +8,7 @@ export async function uploadPlayerImage(file) {
 
 
     const url =
-    "https://api.cloudinary.com/v1_1/np1piqjg/image/upload";
+    "https://api.cloudinary.com/v1_1/y3in3pxq/image/upload";
 
 
 

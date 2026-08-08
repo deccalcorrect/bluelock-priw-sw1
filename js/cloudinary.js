@@ -1,4 +1,10 @@
-export async function uploadPlayerImage(file){
+export async function uploadPlayerImage(file) {
+
+
+    if(!file){
+        return "";
+    }
+
 
 
     const url =
@@ -25,7 +31,6 @@ export async function uploadPlayerImage(file){
 
 
 
-
     const response =
     await fetch(
         url,
@@ -44,8 +49,10 @@ export async function uploadPlayerImage(file){
 
     if(!data.secure_url){
 
+        console.log(data);
+
         throw new Error(
-            "Resim yüklenemedi"
+            "Fotoğraf yüklenemedi"
         );
 
     }
@@ -53,7 +60,6 @@ export async function uploadPlayerImage(file){
 
 
     return data.secure_url;
-
 
 
 }

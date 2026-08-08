@@ -1,4 +1,4 @@
-import { db, auth } from "./firebase.js";
+import { app, db } from "./firebase.js";
 
 import {
     getAuth,
@@ -17,11 +17,9 @@ from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 
 
-
 // Firebase Auth başlat
 
-
-
+const auth = getAuth(app);
 
 
 
@@ -29,40 +27,29 @@ from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 // REGISTER
 // =====================================
 
-
 window.register = async function(){
 
 
     const username =
-    document.getElementById("username").value;
-
+    document.getElementById("username").value.trim();
 
 
     const email =
-    document.getElementById("email").value;
-
+    document.getElementById("email").value.trim();
 
 
     const password =
-    document.getElementById("password").value;
+    document.getElementById("password").value.trim();
 
 
 
-
-
-    if(
-        !username ||
-        !email ||
-        !password
-    ){
+    if(!username || !email || !password){
 
         alert("Tüm alanları doldur");
 
         return;
 
     }
-
-
 
 
 
@@ -83,8 +70,6 @@ window.register = async function(){
 
 
 
-
-
         await setDoc(
 
             doc(
@@ -95,14 +80,13 @@ window.register = async function(){
 
             {
 
-                username:username,
+                username: username,
 
-                email:email,
+                email: email,
 
-                role:"user",
+                role: "user",
 
-                createdAt:
-                new Date()
+                createdAt: new Date()
 
             }
 
@@ -110,26 +94,30 @@ window.register = async function(){
 
 
 
-
-
-        alert(
-            "Kayıt başarılı"
-        );
-
+        alert("Kayıt başarılı");
 
 
         window.location.href =
         "login.html";
 
 
-
-
     }
+
     catch(error){
 
 
+        console.log(
+            "REGISTER ERROR:",
+            error
+        );
+
+
         alert(
+
+            error.code +
+            "\n\n" +
             error.message
+
         );
 
 
@@ -142,35 +130,24 @@ window.register = async function(){
 
 
 
-
-
-
-
 // =====================================
 // LOGIN
 // =====================================
-
 
 window.login = async function(){
 
 
 
     const email =
-    document.getElementById("email").value;
-
+    document.getElementById("email").value.trim();
 
 
     const password =
-    document.getElementById("password").value;
+    document.getElementById("password").value.trim();
 
 
 
-
-
-    if(
-        !email ||
-        !password
-    ){
+    if(!email || !password){
 
         alert(
             "Email ve şifre gir"
@@ -179,7 +156,6 @@ window.login = async function(){
         return;
 
     }
-
 
 
 
@@ -200,13 +176,8 @@ window.login = async function(){
 
 
 
-
-
         const user =
         result.user;
-
-
-
 
 
 
@@ -220,14 +191,9 @@ window.login = async function(){
 
 
 
-
-
-
         alert(
             "Giriş başarılı"
         );
-
-
 
 
 
@@ -235,18 +201,28 @@ window.login = async function(){
         "index.html";
 
 
-
     }
+
+
     catch(error){
 
 
+        console.log(
+            "LOGIN ERROR:",
+            error
+        );
+
+
         alert(
+
+            error.code +
+            "\n\n" +
             error.message
+
         );
 
 
     }
-
 
 
 };

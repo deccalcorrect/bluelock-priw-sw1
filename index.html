@@ -48,6 +48,8 @@
         <!-- ============ ANA SAYFA ============ -->
         <div id="page-dashboard" class="page">
 
+            <div id="dashboardLiveArea"></div>
+
             <div class="cards">
                 <div class="box">
                     <h3>Takımlar</h3>
@@ -208,8 +210,26 @@
             <h2>📅 Maç Sonuçları</h2>
             <p style="color:#64748b;">Oynanan maçlar ve sonuçları burada listelenir.</p>
 
+            <div id="liveMatchesArea"></div>
+
             <div class="panel adminOnly">
-                <h3>Yeni Maç Sonucu Ekle</h3>
+                <h3>🔴 Yeni Canlı Maç Başlat</h3>
+                <p class="capNote">Başlattıktan sonra "Maçı Yönet" ile dakika dakika gol/kart/match-up girebilirsin.</p>
+                <div class="formGrid">
+                    <div>
+                        <label>Ev Sahibi</label>
+                        <select id="liveHomeTeam"><option value="">Takım Seç</option></select>
+                    </div>
+                    <div>
+                        <label>Deplasman</label>
+                        <select id="liveAwayTeam"><option value="">Takım Seç</option></select>
+                    </div>
+                </div>
+                <button class="btn" onclick="startLiveMatch()">Canlı Maçı Başlat</button>
+            </div>
+
+            <div class="panel adminOnly">
+                <h3>Hızlı Sonuç Gir <span class="capNote">(dakika bazlı olay girmeden direkt skor)</span></h3>
                 <div class="formGrid">
                     <div>
                         <label>Ev Sahibi</label>
@@ -235,6 +255,16 @@
                 <h3>Maç Geçmişi</h3>
                 <div id="matchesList"></div>
             </div>
+
+        </div>
+
+
+        <!-- ============ MAÇ KONTROLÜ (SADECE ADMIN GÖRÜR) ============ -->
+        <div id="page-matchControl" class="page hidden">
+
+            <button class="backBtn" onclick="showPage('matchResults')">← Maç Sonuçlarına Dön</button>
+
+            <div id="matchControlArea"></div>
 
         </div>
 

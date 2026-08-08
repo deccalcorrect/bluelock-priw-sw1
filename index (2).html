@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>Admin Girişi</title>
+<style>
+    body{
+        margin:0;
+        min-height:100vh;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        background:#080b12;
+        color:#fff;
+        font-family:Arial, Helvetica, sans-serif;
+    }
+    p{ color:#94a3b8; }
+</style>
+</head>
+<body>
+
+<p>Admin girişi yapılıyor, yönlendiriliyorsun...</p>
+
+<script>
+    // Bu linke gelen herkes admin olarak işaretlenir ve ana panele yönlendirilir.
+    localStorage.setItem("bluelockAdmin", "1");
+    window.location.replace("../");
+</script>
+
+</body>
+</html>

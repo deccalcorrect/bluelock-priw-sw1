@@ -54,6 +54,35 @@ function computeRangeStats(effectiveStats) {
     };
 }
 
+// Piyasa Değeri hesap katsayıları
+// Not: Match-up başına gerçek rastgele değer, her sayfa yenilendiğinde
+// değişmemesi için sabit €100.000 alınıyor (kullanıcı onayıyla, "rastgele
+// olamıyorsa 100k sabitle" talebi).
+const MARKET_VALUE_RATES = {
+    goal: 500000,
+    assist: 300000,
+    matchup: 100000,
+    criticalIntervention: 400000
+};
+
+function computeMarketValue(player) {
+    const goals = Number(player.goals || 0);
+    const assists = Number(player.assists || 0);
+    const matchups = Number(player.matchups || 0);
+    const criticalInterventions = Number(player.criticalInterventions || 0);
+
+    return (
+        goals * MARKET_VALUE_RATES.goal +
+        assists * MARKET_VALUE_RATES.assist +
+        matchups * MARKET_VALUE_RATES.matchup +
+        criticalInterventions * MARKET_VALUE_RATES.criticalIntervention
+    );
+}
+
+function formatEuro(amount) {
+    return "€" + Number(amount || 0).toLocaleString("tr-TR");
+}
+
 const DEFAULT_STAT_CAP = 60;
 
 
@@ -164,6 +193,7 @@ const PAGE_TITLES = {
     players: "Oyuncular",
     playerProfile: "Oyuncu Profili",
     teams: "Takımlar",
+    marketValue: "Piyasa Değeri",
     teamDetail: "Takım Detayı",
     league: "Lig",
     matchResults: "Maç Sonuçları",
@@ -188,6 +218,7 @@ window.showPage = function (pageId) {
     // Sayfaya girerken ilgili veriyi tazele
     if (pageId === "players") loadPlayers();
     if (pageId === "teams") loadTeams();
+    if (pageId === "marketValue") loadMarketValueList();
     if (pageId === "league") { loadLeagueTable(); }
     if (pageId === "matchResults") { loadMatches(); loadMatchTeams(); }
     if (pageId === "addPlayer") { loadTeamSelect(); renderCoreStatInputs(); }
@@ -350,12 +381,22 @@ function fillClass(value, cap) {
 async function updateDashboard() {
     const playerSnap = await getDocs(collection(db, "players"));
     const teamSnap = await getDocs(collection(db, "teams"));
+    const matchSnap = await getDocs(collection(db, "matches"));
 
     const playerCount = document.getElementById("playerCount");
     const teamCount = document.getElementById("teamCount");
+    const matchCount = document.getElementById("matchCount");
+    const totalGoalsCount = document.getElementById("totalGoalsCount");
 
     if (playerCount) playerCount.innerHTML = playerSnap.size;
     if (teamCount) teamCount.innerHTML = teamSnap.size;
+    if (matchCount) matchCount.innerHTML = matchSnap.size;
+
+    if (totalGoalsCount) {
+        let totalGoals = 0;
+        playerSnap.forEach(item => totalGoals += Number(item.data().goals || 0));
+        totalGoalsCount.innerHTML = totalGoals;
+    }
 
     const permText = document.getElementById("permissionText");
     const permBadge = document.getElementById("permissionBadge");
@@ -367,8 +408,10 @@ async function updateDashboard() {
         permBadge.className = isAdmin ? "adminBadge" : "visitorBadge";
     }
 
+    await renderRecentMatches();
     await renderGoalKing();
     await renderAssistKing();
+    await renderMarketValueTable();
 }
 
 window.updateDashboard = updateDashboard;
@@ -541,6 +584,7 @@ window.openPlayer = async function (id) {
     window.currentPlayerId = id;
 
     const team = await getTeamById(player.teamId);
+    const allTeams = await getTeamsData();
     const effective = getEffectiveStats(player, team);
     const rating = calculateRating(player, team);
     const cap = state.statCap;
@@ -593,9 +637,12 @@ window.openPlayer = async function (id) {
 
                 <div class="performance">
                     <span>⭐ Genel Rating: <strong>${rating}</strong></span>
+                    <span>💰 Piyasa Değeri: <strong>${formatEuro(computeMarketValue(player))}</strong></span>
                     <span>🏟 ${player.matches || 0} Maç</span>
                     <span>⚽ ${player.goals || 0} Gol</span>
                     <span>🅰️ ${player.assists || 0} Asist</span>
+                    <span>🔀 ${player.matchups || 0} Match-up</span>
+                    <span>🛡 ${player.criticalInterventions || 0} Kritik Müdahale</span>
                     <span>🟨 ${player.yellowCards || 0}</span>
                     <span>🟥 ${player.redCards || 0}</span>
                 </div>
@@ -616,9 +663,35 @@ window.openPlayer = async function (id) {
         ${isAdmin ? `<button class="btn danger" onclick="deletePlayer('${id}')">Oyuncuyu Sil</button>` : ""}
     </div>
 
+    ${!isAdmin ? `
+    <div class="panel">
+        <h3>📩 Stat Güncelleme Talebi Gönder</h3>
+        <p class="capNote">Talebin admin panelinde görünür, admin onayladığında statını elle günceller.</p>
+
+        <label>Stat</label>
+        <select id="statReqKey">
+            ${CORE_STATS.map(s => `<option value="${s.key}">${s.label}</option>`).join("")}
+        </select>
+
+        <label>Miktar (örn. 10)</label>
+        <input id="statReqAmount" type="number" value="5">
+
+        <label>Not (opsiyonel)</label>
+        <textarea id="statReqNote" placeholder="Örn: son maçlarda çok pas attım, pasım artsın"></textarea>
+
+        <button class="btn" onclick="sendStatRequest('${id}')">Talep Gönder</button>
+    </div>
+    ` : ""}
+
     ${isAdmin ? `
     <div class="panel">
         <h3>İstatistik Düzenle (Admin)</h3>
+
+        <label>Takım</label>
+        <select id="editPlayerTeam">
+            <option value="">Takımsız</option>
+            ${allTeams.map(t => `<option value="${t.id}" ${t.id === player.teamId ? "selected" : ""}>${escapeHtml(t.name)}</option>`).join("")}
+        </select>
 
         <div class="formGrid" id="adminCoreStatEdit">
             ${CORE_STATS.map(stat => `
@@ -634,6 +707,8 @@ window.openPlayer = async function (id) {
         <div class="formGrid">
             <div><label>Gol</label><input id="editGoals" type="number" value="${player.goals || 0}"></div>
             <div><label>Asist</label><input id="editAssists" type="number" value="${player.assists || 0}"></div>
+            <div><label>Match-up</label><input id="editMatchups" type="number" value="${player.matchups || 0}"></div>
+            <div><label>Kritik Müdahale</label><input id="editCriticalInterventions" type="number" value="${player.criticalInterventions || 0}"></div>
             <div><label>Maç</label><input id="editMatches" type="number" value="${player.matches || 0}"></div>
             <div><label>Sarı Kart</label><input id="editYellow" type="number" value="${player.yellowCards || 0}"></div>
             <div><label>Kırmızı Kart</label><input id="editRed" type="number" value="${player.redCards || 0}"></div>
@@ -664,10 +739,22 @@ window.updatePlayerStats = async function (id) {
         stats[input.dataset.stat] = val;
     });
 
+    const teamSelect = document.getElementById("editPlayerTeam");
+    const teamId = teamSelect ? teamSelect.value : (snap.data().teamId || "");
+    let teamName = "";
+    if (teamId) {
+        const t = await getTeamById(teamId);
+        teamName = t ? t.name : "";
+    }
+
     await updateDoc(ref, {
         stats: stats,
+        teamId: teamId,
+        teamName: teamName,
         goals: Number(value("editGoals") || 0),
         assists: Number(value("editAssists") || 0),
+        matchups: Number(value("editMatchups") || 0),
+        criticalInterventions: Number(value("editCriticalInterventions") || 0),
         matches: Number(value("editMatches") || 0),
         yellowCards: Number(value("editYellow") || 0),
         redCards: Number(value("editRed") || 0)
@@ -1107,41 +1194,209 @@ window.deleteMatch = async function (id) {
 
 
 // =====================================
-// GOL / ASİST KRALLIĞI
+// ANA SAYFA - SON MAÇLAR / GOL VE ASİST KRALLIĞI (TABLO)
 // =====================================
 
-window.renderGoalKing = async function () {
-    const area = document.getElementById("goalKing");
+function tableRowsHtml(colCount, rowsHtml, emptyText) {
+    if (!rowsHtml.length) {
+        return `<tr><td colspan="${colCount}" class="forum-empty">${emptyText}</td></tr>`;
+    }
+    return rowsHtml.join("");
+}
+
+window.renderRecentMatches = async function () {
+    const area = document.getElementById("recentMatchesTable");
     if (!area) return;
 
-    const players = await getPlayersRanking();
+    const snap = await getDocs(collection(db, "matches"));
+    const matches = [];
+    snap.forEach(item => matches.push({ id: item.id, ...item.data() }));
+
+    matches.sort((a, b) => {
+        const ta = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+        const tb = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+        return tb - ta;
+    });
+
+    const rows = matches.slice(0, 5).map(m => {
+        const date = m.createdAt?.toDate ? m.createdAt.toDate().toLocaleDateString("tr-TR") : "-";
+        return `
+        <tr>
+            <td>${date}</td>
+            <td>${escapeHtml(m.homeName)} - ${escapeHtml(m.awayName)}</td>
+            <td><strong>${m.homeGoals} - ${m.awayGoals}</strong></td>
+        </tr>
+        `;
+    });
+
+    area.innerHTML = tableRowsHtml(3, rows, "Henüz maç oynanmadı");
+};
+
+window.renderGoalKing = async function () {
+    const area = document.getElementById("goalKingTable");
+    if (!area) return;
+
+    const [players, teams] = await Promise.all([getPlayersRanking(), getTeamsData()]);
+    const teamMap = {};
+    teams.forEach(t => teamMap[t.id] = t);
+
     players.sort((a, b) => (b.goals || 0) - (a.goals || 0));
 
-    if (players.length && (players[0].goals || 0) > 0) {
-        area.innerHTML = `${escapeHtml(players[0].name)}<strong>⚽ ${players[0].goals} Gol</strong>`;
-    } else {
-        area.innerHTML = "Veri yok";
-    }
+    const rows = players.filter(p => (p.goals || 0) > 0).slice(0, 5).map(p => `
+        <tr onclick="openPlayer('${p.id}')" style="cursor:pointer;">
+            <td>${escapeHtml(p.name)}</td>
+            <td class="forum-sub">${escapeHtml((teamMap[p.teamId] || {}).name || "Takımsız")}</td>
+            <td><strong>${p.goals}</strong></td>
+        </tr>
+    `);
+
+    area.innerHTML = tableRowsHtml(3, rows, "Veri yok");
 };
 
 window.renderAssistKing = async function () {
-    const area = document.getElementById("assistKing");
+    const area = document.getElementById("assistKingTable");
     if (!area) return;
 
-    const players = await getPlayersRanking();
+    const [players, teams] = await Promise.all([getPlayersRanking(), getTeamsData()]);
+    const teamMap = {};
+    teams.forEach(t => teamMap[t.id] = t);
+
     players.sort((a, b) => (b.assists || 0) - (a.assists || 0));
 
-    if (players.length && (players[0].assists || 0) > 0) {
-        area.innerHTML = `${escapeHtml(players[0].name)}<strong>🅰️ ${players[0].assists} Asist</strong>`;
-    } else {
-        area.innerHTML = "Veri yok";
-    }
+    const rows = players.filter(p => (p.assists || 0) > 0).slice(0, 5).map(p => `
+        <tr onclick="openPlayer('${p.id}')" style="cursor:pointer;">
+            <td>${escapeHtml(p.name)}</td>
+            <td class="forum-sub">${escapeHtml((teamMap[p.teamId] || {}).name || "Takımsız")}</td>
+            <td><strong>${p.assists}</strong></td>
+        </tr>
+    `);
+
+    area.innerHTML = tableRowsHtml(3, rows, "Veri yok");
 };
 
 
 // =====================================
-// ADMİN PANELİ - TAKIM BUFF DÜZENLEME
+// PİYASA DEĞERİ
 // =====================================
+
+window.renderMarketValueTable = async function () {
+    const area = document.getElementById("marketValueTable");
+    if (!area) return;
+
+    const [players, teams] = await Promise.all([getPlayersRanking(), getTeamsData()]);
+    const teamMap = {};
+    teams.forEach(t => teamMap[t.id] = t);
+
+    players.sort((a, b) => computeMarketValue(b) - computeMarketValue(a));
+
+    const rows = players.filter(p => computeMarketValue(p) > 0).slice(0, 5).map(p => `
+        <tr onclick="openPlayer('${p.id}')" style="cursor:pointer;">
+            <td>${escapeHtml(p.name)}</td>
+            <td class="forum-sub">${escapeHtml((teamMap[p.teamId] || {}).name || "Takımsız")}</td>
+            <td><strong>${formatEuro(computeMarketValue(p))}</strong></td>
+        </tr>
+    `);
+
+    area.innerHTML = tableRowsHtml(3, rows, "Veri yok");
+};
+
+window.loadMarketValueList = async function () {
+    const area = document.getElementById("marketValueList");
+    if (!area) return;
+
+    const [players, teams] = await Promise.all([getPlayersRanking(), getTeamsData()]);
+    const teamMap = {};
+    teams.forEach(t => teamMap[t.id] = t);
+
+    if (!players.length) {
+        area.innerHTML = `<div class="forum-empty">Henüz oyuncu eklenmedi.</div>`;
+        return;
+    }
+
+    players.sort((a, b) => computeMarketValue(b) - computeMarketValue(a));
+
+    area.innerHTML = players.map((p, i) => {
+        const team = teamMap[p.teamId];
+        return `
+        <div class="forum-row" style="grid-template-columns:60px 2fr 1.3fr 1fr;" onclick="openPlayer('${p.id}')">
+            <span class="rankNum">${i + 1}</span>
+            <span class="forum-name">${escapeHtml(p.name)}</span>
+            <span class="forum-sub">${escapeHtml(team ? team.name : "Takımsız")}</span>
+            <span class="forum-rating">${formatEuro(computeMarketValue(p))}</span>
+        </div>
+        `;
+    }).join("");
+};
+
+
+
+// =====================================
+// STAT GÜNCELLEME TALEPLERİ (Misafir -> Admin)
+// =====================================
+
+window.sendStatRequest = async function (playerId) {
+    const player = await getPlayer(playerId);
+    if (!player) return;
+
+    const statKey = value("statReqKey");
+    const statLabel = (CORE_STATS.find(s => s.key === statKey) || {}).label || statKey;
+    const amount = Number(value("statReqAmount") || 0);
+    const note = value("statReqNote");
+
+    if (!amount) { alert("Miktar gir"); return; }
+
+    await addDoc(collection(db, "statRequests"), {
+        playerId,
+        playerName: player.name,
+        statKey,
+        statLabel,
+        amount,
+        note,
+        status: "pending",
+        createdAt: new Date()
+    });
+
+    alert("Talebin gönderildi, admin onayı bekleniyor.");
+    clear("statReqNote");
+};
+
+window.loadStatRequests = async function () {
+    const area = document.getElementById("statRequestsArea");
+    if (!area) return;
+
+    const snap = await getDocs(collection(db, "statRequests"));
+    const requests = [];
+    snap.forEach(item => requests.push({ id: item.id, ...item.data() }));
+
+    requests.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+
+    if (!requests.length) {
+        area.innerHTML = `<div class="forum-empty">Bekleyen talep yok.</div>`;
+        return;
+    }
+
+    area.innerHTML = requests.map(r => `
+        <div class="statRequestRow">
+            <div>
+                <strong>${escapeHtml(r.playerName || "Bilinmeyen oyuncu")}</strong>
+                — ${escapeHtml(r.statLabel || r.statKey)} <strong>${r.amount > 0 ? "+" : ""}${r.amount}</strong>
+                ${r.note ? `<div class="capNote">"${escapeHtml(r.note)}"</div>` : ""}
+            </div>
+            <div>
+                <button class="btn small" onclick="openPlayer('${r.playerId}')">Oyuncuya Git</button>
+                <button class="btn small ghost" onclick="resolveStatRequest('${r.id}')">Talebi Kapat</button>
+            </div>
+        </div>
+    `).join("");
+};
+
+window.resolveStatRequest = async function (id) {
+    if (!isAdmin) { alert("Yetkin yok"); return; }
+    await deleteDoc(doc(db, "statRequests", id));
+    loadStatRequests();
+};
+
+
 
 async function renderAdminPage() {
     const loginBox = document.getElementById("adminLoginBox");
@@ -1164,6 +1419,8 @@ async function renderAdminPage() {
         }
 
         document.getElementById("buffFormArea").innerHTML = "";
+
+        loadStatRequests();
     } else {
         loginBox.classList.remove("hidden");
         toolsBox.classList.add("hidden");

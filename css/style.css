@@ -256,3 +256,44 @@ border-radius:6px;
 margin:5px 0;
 
 }
+.hidden{
+display:none;
+}
+
+
+.menu{
+
+display:flex;
+gap:10px;
+justify-content:center;
+flex-wrap:wrap;
+margin:20px;
+
+}
+
+
+.menu button{
+
+background:#2563eb;
+
+}
+
+
+table{
+
+width:100%;
+
+background:#111827;
+
+border-collapse:collapse;
+
+}
+
+
+td,th{
+
+padding:12px;
+
+border-bottom:1px solid #374151;
+
+}

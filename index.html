@@ -20,16 +20,54 @@
 
 <h1>⚽ Bluelock Priw SW</h1>
 
-<p>Oyuncu Yönetim Paneli</p>
+<p>Lig Yönetim Paneli</p>
 
 </header>
+
+
+
+<nav class="menu">
+
+<button onclick="showPage('playersPage')">
+Oyuncular
+</button>
+
+<button onclick="showPage('teamsPage')">
+Takımlar
+</button>
+
+<button onclick="showPage('tablePage')">
+Puan Durumu
+</button>
+
+<button onclick="showPage('goalsPage')">
+Gol Krallığı
+</button>
+
+<button onclick="showPage('assistsPage')">
+Asist Krallığı
+</button>
+
+<button onclick="showPage('statsPage')">
+⚡ Hızlı Stat Aktar
+</button>
+
+</nav>
+
+
 
 
 
 <main>
 
 
-<section class="panel">
+
+<!-- OYUNCULAR -->
+
+<section id="playersPage" class="page">
+
+
+<div class="panel">
 
 
 <h2>Oyuncu Ekle</h2>
@@ -63,12 +101,12 @@ accept="image/*"
 
 <div class="stat">
 
-<input class="statName" placeholder="Çeviklik">
+<input class="statName" placeholder="Hız">
 
 <input 
 class="statValue"
 type="number"
-placeholder="80">
+placeholder="90">
 
 </div>
 
@@ -81,9 +119,273 @@ placeholder="80">
 </button>
 
 
+<br>
 
-<br><br>
 
+<button class="save" onclick="savePlayer()">
+
+Oyuncuyu Kaydet
+
+</button>
+
+
+</div>
+
+
+
+
+
+<h2>Oyuncular</h2>
+
+
+<div id="players">
+
+</div>
+
+
+
+</section>
+
+
+
+
+
+
+
+<!-- TAKIMLAR -->
+
+
+<section id="teamsPage" class="page hidden">
+
+
+<div class="panel">
+
+
+<h2>Takım Ekle</h2>
+
+
+<input 
+id="teamName"
+placeholder="Blue Lock FC">
+
+
+<button onclick="addTeam()">
+
+Takım Oluştur
+
+</button>
+
+
+</div>
+
+
+<div id="teams">
+
+</div>
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<!-- PUAN DURUMU -->
+
+
+<section id="tablePage" class="page hidden">
+
+
+<h2>
+Puan Durumu
+</h2>
+
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>
+Takım
+</th>
+
+<th>
+O
+</th>
+
+<th>
+P
+</th>
+
+</tr>
+
+</thead>
+
+
+<tbody id="leagueTable">
+
+</tbody>
+
+
+</table>
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<!-- GOL KRALLIĞI -->
+
+
+<section id="goalsPage" class="page hidden">
+
+
+<h2>
+⚽ Gol Krallığı
+</h2>
+
+
+<div id="goalRanking">
+
+</div>
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<!-- ASİST KRALLIĞI -->
+
+
+<section id="assistsPage" class="page hidden">
+
+
+<h2>
+🅰️ Asist Krallığı
+</h2>
+
+
+<div id="assistRanking">
+
+</div>
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<!-- HIZLI STAT -->
+
+
+<section id="statsPage" class="page hidden">
+
+
+<div class="panel">
+
+
+<h2>
+⚡ Hızlı Stat Aktar
+</h2>
+
+
+<select id="statPlayer">
+
+<option>
+Oyuncu Seç
+</option>
+
+
+</select>
+
+
+
+<textarea 
+id="statText"
+placeholder="Hız:90
+Pas:85
+Çeviklik:80">
+</textarea>
+
+
+
+<button onclick="transferStats()">
+
+Oyuncuya Aktar
+
+</button>
+
+
+</div>
+
+
+</section>
+
+
+
+
+
+</main>
+
+
+
+
+
+<script type="module" src="js/app.js"></script>
+
+
+<script>
+
+
+function showPage(id){
+
+
+document
+.querySelectorAll(".page")
+.forEach(
+p=>p.classList.add("hidden")
+);
+
+
+document
+.getElementById(id)
+.classList.remove("hidden");
+
+
+}
+
+
+</script>
+
+
+
+</body>
+
+</html>
 
 <button class="save"
 onclick="savePlayer()">

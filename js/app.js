@@ -9,6 +9,7 @@ doc
 }
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+
 import {
 uploadPlayerImage
 }
@@ -16,31 +17,28 @@ from "./cloudinary.js";
 
 
 
-
-// ----------------
-// STAT EKLEME
-// ----------------
-
+// -----------------------
+// OYUNCU STAT EKLE
+// -----------------------
 
 window.addStat = function(){
 
-
-const container =
+let container =
 document.getElementById("statsContainer");
 
 
-const div =
+let div =
 document.createElement("div");
 
 
 div.className="stat";
 
 
-div.innerHTML = `
+div.innerHTML=`
 
-<input class="statName" placeholder="Stat adı">
+<input class="statName" placeholder="Stat">
 
-<input class="statValue" type="number" placeholder="Değer">
+<input class="statValue" type="number" placeholder="90">
 
 `;
 
@@ -53,26 +51,25 @@ container.appendChild(div);
 
 
 
-
-// ----------------
+// -----------------------
 // OYUNCU KAYDET
-// ----------------
-
+// -----------------------
 
 window.savePlayer = async function(){
 
 
-const name =
+let name =
 document.getElementById("playerName").value;
 
 
 
-const file =
+let file =
 document.getElementById("playerImage").files[0];
 
 
 
 let image="";
+
 
 
 if(file){
@@ -88,30 +85,29 @@ let stats={};
 
 
 
-const names =
-document.querySelectorAll(".statName");
+document
+.querySelectorAll(".stat")
+.forEach(stat=>{
 
 
-const values =
-document.querySelectorAll(".statValue");
+let n =
+stat.querySelector(".statName").value;
+
+
+let v =
+stat.querySelector(".statValue").value;
 
 
 
-for(let i=0;i<names.length;i++){
+if(n){
 
-
-if(names[i].value){
-
-
-stats[names[i].value]
-=
-Number(values[i].value);
-
+stats[n]=Number(v);
 
 }
 
 
-}
+});
+
 
 
 
@@ -154,74 +150,93 @@ loadPlayers();
 
 
 
-// ----------------
-// OYUNCULARI GETİR
-// ----------------
-
+// -----------------------
+// OYUNCULAR
+// -----------------------
 
 async function loadPlayers(){
 
 
-const area =
-document.getElementById("players");
+let area =
+document.getElementById("playersList");
+
+
+if(!area)return;
+
 
 
 area.innerHTML="";
 
 
 
-const select =
+let select =
 document.getElementById("statPlayer");
 
 
+
+if(select){
+
 select.innerHTML=
-`<option>Oyuncu Seç</option>`;
+"<option>Oyuncu Seç</option>";
+
+}
 
 
 
-const snap =
+let snap =
 await getDocs(
 collection(db,"players")
 );
 
 
 
-snap.forEach((d)=>{
+snap.forEach(d=>{
 
 
 let p=d.data();
 
 
 
-area.innerHTML += `
+area.innerHTML +=`
 
 <div class="player-card">
 
 
-<img src="${p.image}">
+<img src="${p.image || ''}">
 
 
-<h3>${p.name}</h3>
+<h3>
+${p.name}
+</h3>
 
 
-<p>Takım: ${p.team || "Yok"}</p>
+<p>
+Takım:
+${p.team || "Yok"}
+</p>
 
 
-<p>⚽ Gol: ${p.goals}</p>
+<p>
+⚽ ${p.goals || 0} Gol
+</p>
 
 
-<p>🅰️ Asist: ${p.assists}</p>
-
+<p>
+🅰 ${p.assists || 0} Asist
+</p>
 
 
 ${Object.entries(p.stats || {})
-.map(([a,b])=>`
-
+.map(
+([a,b])=>
+`
 <p>
 ${a}: ${b}
 </p>
+`
+)
+.join("")}
 
-`).join("")}
 
 
 </div>
@@ -230,13 +245,17 @@ ${a}: ${b}
 
 
 
-select.innerHTML += `
+if(select){
+
+select.innerHTML +=`
 
 <option value="${d.id}">
 ${p.name}
 </option>
 
 `;
+
+}
 
 
 });
@@ -247,10 +266,13 @@ ${p.name}
 
 
 
-// ----------------
-// TAKIM EKLE
-// ----------------
 
+
+
+
+// -----------------------
+// TAKIM EKLE
+// -----------------------
 
 window.addTeam = async function(){
 
@@ -295,17 +317,28 @@ loadTeams();
 
 
 
+
+
+// -----------------------
+// TAKIMLAR
+// -----------------------
+
 async function loadTeams(){
 
 
-const area =
-document.getElementById("teams");
+let area =
+document.getElementById("teamsList");
+
+
+if(!area)return;
+
 
 
 area.innerHTML="";
 
 
-const snap =
+
+let snap =
 await getDocs(
 collection(db,"teams")
 );
@@ -318,9 +351,11 @@ snap.forEach(d=>{
 let t=d.data();
 
 
-area.innerHTML += `
+
+area.innerHTML+=`
 
 <div class="player-card">
+
 
 <h3>
 ${t.name}
@@ -328,23 +363,25 @@ ${t.name}
 
 
 <p>
-Puan: ${t.points}
+Puan:
+${t.points}
 </p>
 
 
 <p>
-Oynanan: ${t.played}
+Oynanan:
+${t.played}
 </p>
 
 
 </div>
+
 
 `;
 
 
 
 });
-
 
 
 }
@@ -355,21 +392,172 @@ Oynanan: ${t.played}
 
 
 
-// ----------------
+
+
+// -----------------------
+// GOL KRALLIĞI
+// -----------------------
+
+async function loadGoals(){
+
+
+let area =
+document.getElementById("goalList");
+
+
+if(!area)return;
+
+
+
+area.innerHTML="";
+
+
+
+let players=[];
+
+
+
+let snap =
+await getDocs(
+collection(db,"players")
+);
+
+
+
+snap.forEach(d=>{
+
+
+players.push(d.data());
+
+
+});
+
+
+
+players.sort(
+(a,b)=>
+(b.goals||0)-(a.goals||0)
+);
+
+
+
+players.forEach((p,i)=>{
+
+
+area.innerHTML+=`
+
+<div class="player-card">
+
+${i+1}.
+${p.name}
+
+⚽ ${p.goals||0}
+
+</div>
+
+`;
+
+});
+
+
+}
+
+
+
+
+
+
+
+
+
+// -----------------------
+// ASİST KRALLIĞI
+// -----------------------
+
+async function loadAssists(){
+
+
+let area =
+document.getElementById("assistList");
+
+
+if(!area)return;
+
+
+
+area.innerHTML="";
+
+
+
+let players=[];
+
+
+
+let snap =
+await getDocs(
+collection(db,"players")
+);
+
+
+
+snap.forEach(d=>{
+
+
+players.push(d.data());
+
+
+});
+
+
+
+players.sort(
+(a,b)=>
+(b.assists||0)-(a.assists||0)
+);
+
+
+
+players.forEach((p,i)=>{
+
+
+area.innerHTML+=`
+
+<div class="player-card">
+
+${i+1}.
+${p.name}
+
+🅰 ${p.assists||0}
+
+</div>
+
+`;
+
+});
+
+
+}
+
+
+
+
+
+
+
+
+// -----------------------
 // HIZLI STAT AKTAR
-// ----------------
-
-
+// -----------------------
 
 window.transferStats = async function(){
 
 
-const id =
+let id =
 document.getElementById("statPlayer").value;
 
 
 
-const text =
+let text =
 document.getElementById("statText").value;
 
 
@@ -378,13 +566,13 @@ let stats={};
 
 
 
-text.split("\n")
+text
+.split("\n")
 .forEach(line=>{
 
 
 let parts =
 line.split(":");
-
 
 
 if(parts.length===2){
@@ -395,14 +583,11 @@ parts[0].trim()
 ]
 =
 Number(
-parts[1]
-.trim()
+parts[1].trim()
 );
 
 
-
 }
-
 
 
 });
@@ -421,7 +606,7 @@ stats:stats
 
 
 
-alert("Statlar aktarıldı");
+alert("Statlar güncellendi");
 
 
 loadPlayers();
@@ -438,3 +623,7 @@ loadPlayers();
 loadPlayers();
 
 loadTeams();
+
+loadGoals();
+
+loadAssists();

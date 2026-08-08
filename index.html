@@ -178,6 +178,93 @@ Maçlar
 </h2>
 
 
+<div class="panel">
+
+<h3>Yeni Oyuncu Ekle</h3>
+
+
+<input id="playerName" placeholder="Oyuncu Adı">
+
+
+<input id="playerPosition" placeholder="Pozisyon (ST, MC, GK)">
+
+
+
+<input id="playerTeam" placeholder="Takım">
+
+
+
+<input id="playerAge" placeholder="Yaş">
+
+
+<input id="playerHeight" placeholder="Boy">
+
+
+<input id="playerWeight" placeholder="Kilo">
+
+
+
+<label>
+Oyuncu Fotoğrafı
+</label>
+
+
+<input 
+type="file"
+id="playerImage"
+accept="image/*"
+>
+
+
+
+<h3>İstatistikler</h3>
+
+
+<div id="statsContainer">
+
+
+<div class="stat">
+
+<input class="statName" placeholder="Hız">
+
+<input class="statValue" placeholder="90">
+
+</div>
+
+
+</div>
+
+
+
+<button onclick="addStat()">
++ Stat Ekle
+</button>
+
+
+
+<input id="playerGoals" placeholder="Gol">
+
+<input id="playerAssists" placeholder="Asist">
+
+
+
+<button onclick="savePlayer()" class="save">
+
+Oyuncuyu Kaydet
+
+</button>
+
+
+</div>
+
+
+
+
+<h3>
+Oyuncu Listesi
+</h3>
+
+
 <div id="playersList">
 
 </div>

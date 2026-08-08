@@ -3,16 +3,23 @@ import { db } from "./firebase.js";
 import {
 collection,
 addDoc,
-getDocs
+getDocs,
+updateDoc,
+doc
 }
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
 
 import {
 uploadPlayerImage
 }
 from "./cloudinary.js";
 
+
+
+
+// ----------------
+// STAT EKLEME
+// ----------------
 
 
 window.addStat = function(){
@@ -33,10 +40,7 @@ div.innerHTML = `
 
 <input class="statName" placeholder="Stat adı">
 
-<input 
-class="statValue"
-type="number"
-placeholder="Değer">
+<input class="statValue" type="number" placeholder="Değer">
 
 `;
 
@@ -44,10 +48,15 @@ placeholder="Değer">
 container.appendChild(div);
 
 
-}
+};
 
 
 
+
+
+// ----------------
+// OYUNCU KAYDET
+// ----------------
 
 
 window.savePlayer = async function(){
@@ -63,52 +72,47 @@ document.getElementById("playerImage").files[0];
 
 
 
-let imageUrl = "";
-
+let image="";
 
 
 if(file){
 
-imageUrl =
+image =
 await uploadPlayerImage(file);
 
 }
 
 
 
-const stats = {};
+let stats={};
 
 
 
-const statNames =
+const names =
 document.querySelectorAll(".statName");
 
 
-const statValues =
+const values =
 document.querySelectorAll(".statValue");
 
 
 
-for(let i=0;i<statNames.length;i++){
+for(let i=0;i<names.length;i++){
 
 
-let key =
-statNames[i].value.trim();
+if(names[i].value){
 
 
-let value =
-statValues[i].value;
+stats[names[i].value]
+=
+Number(values[i].value);
 
-
-
-if(key){
-
-stats[key]=Number(value);
 
 }
 
 
 }
+
 
 
 
@@ -118,11 +122,15 @@ collection(db,"players"),
 
 name:name,
 
-image:imageUrl,
+image:image,
 
 stats:stats,
 
-created:new Date()
+goals:0,
+
+assists:0,
+
+team:""
 
 }
 
@@ -130,19 +138,25 @@ created:new Date()
 
 
 
-alert("Oyuncu kaydedildi!");
-
+alert("Oyuncu eklendi");
 
 
 loadPlayers();
 
 
-}
+};
 
 
 
 
 
+
+
+
+
+// ----------------
+// OYUNCULARI GETİR
+// ----------------
 
 
 async function loadPlayers(){
@@ -152,47 +166,59 @@ const area =
 document.getElementById("players");
 
 
-
 area.innerHTML="";
 
 
 
-const snapshot =
+const select =
+document.getElementById("statPlayer");
+
+
+select.innerHTML=
+`<option>Oyuncu Seç</option>`;
+
+
+
+const snap =
 await getDocs(
 collection(db,"players")
 );
 
 
 
-snapshot.forEach((doc)=>{
+snap.forEach((d)=>{
 
 
-const player =
-doc.data();
+let p=d.data();
 
 
 
 area.innerHTML += `
 
-
 <div class="player-card">
 
 
-<img src="${player.image || ''}">
+<img src="${p.image}">
 
 
-<h3>
-${player.name}
-</h3>
+<h3>${p.name}</h3>
 
 
-<div>
+<p>Takım: ${p.team || "Yok"}</p>
 
-${Object.entries(player.stats || {})
-.map(([k,v])=>`
+
+<p>⚽ Gol: ${p.goals}</p>
+
+
+<p>🅰️ Asist: ${p.assists}</p>
+
+
+
+${Object.entries(p.stats || {})
+.map(([a,b])=>`
 
 <p>
-<b>${k}</b> : ${v}
+${a}: ${b}
 </p>
 
 `).join("")}
@@ -200,9 +226,15 @@ ${Object.entries(player.stats || {})
 
 </div>
 
+`;
 
-</div>
 
+
+select.innerHTML += `
+
+<option value="${d.id}">
+${p.name}
+</option>
 
 `;
 
@@ -214,4 +246,195 @@ ${Object.entries(player.stats || {})
 
 
 
+
+// ----------------
+// TAKIM EKLE
+// ----------------
+
+
+window.addTeam = async function(){
+
+
+let name =
+document.getElementById("teamName").value;
+
+
+
+await addDoc(
+collection(db,"teams"),
+{
+
+name:name,
+
+points:0,
+
+played:0,
+
+wins:0,
+
+draws:0,
+
+losses:0
+
+}
+
+);
+
+
+alert("Takım eklendi");
+
+
+loadTeams();
+
+
+};
+
+
+
+
+
+
+
+async function loadTeams(){
+
+
+const area =
+document.getElementById("teams");
+
+
+area.innerHTML="";
+
+
+const snap =
+await getDocs(
+collection(db,"teams")
+);
+
+
+
+snap.forEach(d=>{
+
+
+let t=d.data();
+
+
+area.innerHTML += `
+
+<div class="player-card">
+
+<h3>
+${t.name}
+</h3>
+
+
+<p>
+Puan: ${t.points}
+</p>
+
+
+<p>
+Oynanan: ${t.played}
+</p>
+
+
+</div>
+
+`;
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+// ----------------
+// HIZLI STAT AKTAR
+// ----------------
+
+
+
+window.transferStats = async function(){
+
+
+const id =
+document.getElementById("statPlayer").value;
+
+
+
+const text =
+document.getElementById("statText").value;
+
+
+
+let stats={};
+
+
+
+text.split("\n")
+.forEach(line=>{
+
+
+let parts =
+line.split(":");
+
+
+
+if(parts.length===2){
+
+
+stats[
+parts[0].trim()
+]
+=
+Number(
+parts[1]
+.trim()
+);
+
+
+
+}
+
+
+
+});
+
+
+
+await updateDoc(
+doc(db,"players",id),
+{
+
+stats:stats
+
+}
+
+);
+
+
+
+alert("Statlar aktarıldı");
+
+
 loadPlayers();
+
+
+};
+
+
+
+
+
+
+
+loadPlayers();
+
+loadTeams();

@@ -923,9 +923,20 @@ window.saveTeam = async function () {
     if (!isAdmin) { alert("Bu işlem için admin yetkisi gerekli"); return; }
 
     const name = value("teamName");
-    const logo = value("teamLogo");
-
     if (!name) { alert("Takım adı gerekli"); return; }
+
+    let logo = "";
+    const logoFile = document.getElementById("teamLogo");
+
+    if (logoFile && logoFile.files[0]) {
+        try {
+            logo = await uploadPlayerImage(logoFile.files[0]);
+        } catch (error) {
+            console.error(error);
+            alert(error.message);
+            return;
+        }
+    }
 
     const emptyBuffs = {};
     CORE_STATS.forEach(s => emptyBuffs[s.key] = 0);
@@ -945,7 +956,7 @@ window.saveTeam = async function () {
 
     alert("Takım oluşturuldu");
     clear("teamName");
-    clear("teamLogo");
+    if (logoFile) logoFile.value = "";
 
     updateDashboard();
 };

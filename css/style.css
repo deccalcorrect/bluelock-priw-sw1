@@ -1,219 +1,214 @@
 *{
-box-sizing:border-box;
-font-family:Arial, sans-serif;
+    box-sizing:border-box;
+    font-family:Arial, Helvetica, sans-serif;
 }
 
 
 body{
 
-margin:0;
-
-background:#0b0f19;
-
-color:white;
+    margin:0;
+    background:#080b12;
+    color:#fff;
 
 }
 
 
-header{
+/* ANA YAPI */
 
-text-align:center;
+.layout{
 
-padding:30px;
-
-background:
-linear-gradient(
-135deg,
-#111827,
-#1e3a8a
-);
-
-box-shadow:
-0 5px 20px #000;
-
-}
-
-
-header h1{
-
-font-size:38px;
-
-margin:0;
-
-}
-
-
-header p{
-
-opacity:.8;
+    display:flex;
+    min-height:100vh;
 
 }
 
 
 
-main{
+/* SOL MENÜ */
 
-width:90%;
+.sidebar{
 
-max-width:1100px;
+    width:260px;
+    background:#10141f;
+    padding:25px 15px;
+    border-right:1px solid #252b3a;
+    position:fixed;
+    height:100vh;
 
-margin:30px auto;
+}
 
-display:grid;
 
-grid-template-columns:1fr;
+.sidebar h1{
 
-gap:30px;
+    text-align:center;
+    margin:0;
+    font-size:28px;
+
+}
+
+
+.league{
+
+    text-align:center;
+    color:#3b82f6;
+    margin-bottom:35px;
+    font-weight:bold;
 
 }
 
 
 
-.panel{
+.sidebar button{
 
-background:#111827;
+    width:100%;
+    padding:14px;
+    margin-bottom:10px;
 
-padding:25px;
+    background:#171d2b;
 
-border-radius:15px;
+    color:white;
 
-box-shadow:
-0 0 20px rgba(0,0,0,.4);
+    border:none;
 
-}
+    border-radius:8px;
 
+    text-align:left;
 
+    cursor:pointer;
 
-h2{
-
-border-bottom:
-2px solid #2563eb;
-
-padding-bottom:10px;
+    font-size:15px;
 
 }
 
 
 
-input{
+.sidebar button:hover{
 
-width:100%;
-
-padding:12px;
-
-margin:8px 0;
-
-border-radius:8px;
-
-border:none;
-
-background:#1f2937;
-
-color:white;
+    background:#2563eb;
 
 }
 
 
 
-button{
-
-padding:12px 18px;
-
-border:none;
-
-border-radius:8px;
-
-cursor:pointer;
-
-background:#2563eb;
-
-color:white;
-
-font-weight:bold;
-
-margin-top:10px;
-
-}
+/* ANA İÇERİK */
 
 
-button:hover{
+.content{
 
-background:#1d4ed8;
+    margin-left:260px;
+    width:calc(100% - 260px);
 
-}
-
-
-
-.save{
-
-background:#16a34a;
-
-width:100%;
-
-font-size:16px;
-
-}
-
-
-.save:hover{
-
-background:#15803d;
+    padding:25px;
 
 }
 
 
 
 
-.stat{
+.topbar{
 
-display:flex;
+    background:#10141f;
 
-gap:10px;
+    padding:20px;
 
-}
+    border-radius:12px;
 
+    display:flex;
 
+    justify-content:space-between;
 
-.stat input:first-child{
+    align-items:center;
 
-flex:2;
+    margin-bottom:30px;
 
-}
-
-
-.stat input:last-child{
-
-flex:1;
+    border:1px solid #222938;
 
 }
 
 
 
 
+.page h2{
 
-#players{
-
-display:grid;
-
-grid-template-columns:
-repeat(auto-fit,minmax(250px,1fr));
-
-gap:20px;
+    margin-bottom:20px;
 
 }
 
+
+
+
+.hidden{
+
+    display:none;
+
+}
+
+
+
+/* ANA KARTLAR */
+
+
+.cards{
+
+    display:grid;
+
+    grid-template-columns:
+    repeat(auto-fit,minmax(200px,1fr));
+
+    gap:20px;
+
+}
+
+
+
+.box{
+
+    background:#111827;
+
+    padding:25px;
+
+    border-radius:15px;
+
+    border:1px solid #263043;
+
+}
+
+
+
+.box h3{
+
+    color:#94a3b8;
+
+}
+
+
+
+.box p{
+
+    font-size:35px;
+
+    color:#3b82f6;
+
+}
+
+
+
+
+
+/* OYUNCU KARTLARI */
 
 
 .player-card{
 
-background:#111827;
+    background:#111827;
 
-border-radius:15px;
+    border-radius:15px;
 
-padding:20px;
+    padding:20px;
 
-box-shadow:
-0 0 15px rgba(0,0,0,.5);
+    margin-bottom:15px;
+
+    border:1px solid #273244;
 
 }
 
@@ -221,79 +216,134 @@ box-shadow:
 
 .player-card img{
 
-width:100%;
+    width:120px;
 
-height:250px;
+    height:120px;
 
-object-fit:cover;
+    object-fit:cover;
 
-border-radius:10px;
-
-background:#374151;
+    border-radius:50%;
 
 }
 
 
 
-.player-card h3{
-
-font-size:24px;
-
-margin:15px 0;
-
-}
 
 
-
-.player-card p{
-
-background:#1f2937;
-
-padding:8px;
-
-border-radius:6px;
-
-margin:5px 0;
-
-}
-.hidden{
-display:none;
-}
-
-
-.menu{
-
-display:flex;
-gap:10px;
-justify-content:center;
-flex-wrap:wrap;
-margin:20px;
-
-}
-
-
-.menu button{
-
-background:#2563eb;
-
-}
+/* TABLO */
 
 
 table{
 
-width:100%;
+    width:100%;
 
-background:#111827;
+    border-collapse:collapse;
 
-border-collapse:collapse;
+    background:#111827;
+
+    border-radius:12px;
+
+    overflow:hidden;
 
 }
 
 
+
+th{
+
+    background:#1e293b;
+
+}
+
+
+
 td,th{
 
-padding:12px;
+    padding:15px;
 
-border-bottom:1px solid #374151;
+    border-bottom:1px solid #273244;
+
+}
+
+
+
+
+
+/* FORM ELEMANLARI */
+
+
+input,
+textarea,
+select{
+
+
+    width:100%;
+
+    padding:12px;
+
+    margin:10px 0;
+
+    background:#111827;
+
+    color:white;
+
+    border:1px solid #374151;
+
+    border-radius:8px;
+
+
+}
+
+
+
+textarea{
+
+    min-height:150px;
+
+}
+
+
+
+
+
+button{
+
+    cursor:pointer;
+
+}
+
+
+
+
+
+@media(max-width:800px){
+
+
+.sidebar{
+
+    width:80px;
+
+}
+
+
+
+.sidebar h1,
+.league{
+
+    display:none;
+
+}
+
+
+
+.content{
+
+    margin-left:80px;
+
+    width:calc(100% - 80px);
+
+}
+
+
 
 }

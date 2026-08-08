@@ -2,11 +2,13 @@ export async function uploadPlayerImage(file){
 
 
     const url =
-    "https://api.cloudinary.com/v1_1/REPLACE_CLOUD_NAME/image/upload";
+    "https://api.cloudinary.com/v1_1/np1piqjg/image/upload";
+
 
 
     const formData =
     new FormData();
+
 
 
     formData.append(
@@ -15,10 +17,12 @@ export async function uploadPlayerImage(file){
     );
 
 
+
     formData.append(
         "upload_preset",
-        "REPLACE_UPLOAD_PRESET"
+        "bluelock_players"
     );
+
 
 
 
@@ -38,7 +42,18 @@ export async function uploadPlayerImage(file){
 
 
 
+    if(!data.secure_url){
+
+        throw new Error(
+            "Resim yüklenemedi"
+        );
+
+    }
+
+
+
     return data.secure_url;
+
 
 
 }

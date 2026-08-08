@@ -8,7 +8,7 @@ from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
 
-apiKey: "AIzaSyBqwg0Z4FamOfbRqQYG4cpfnD3souVU8E",
+apiKey: "AIzaSyBqwg0Z4FamOfbRqQYG4cpfnD3souVU8E4",
 
 authDomain: "bluelock-3f153.firebaseapp.com",
 

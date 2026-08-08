@@ -4,6 +4,7 @@
 // 1/3
 // =====================================
 
+import { uploadPlayerImage } from "./cloudinary.js";
 
 import { db } from "./firebase.js";
 

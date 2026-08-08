@@ -516,19 +516,127 @@ players.sort(
 players.forEach((p,i)=>{
 
 
-area.innerHTML+=`
+area.innerHTML +=`
 
-<div class="player-card">
+<div class="fm-card">
 
-${i+1}.
+
+<div class="fm-header">
+
+
+<img class="fm-photo" src="${p.image || 'https://via.placeholder.com/150'}">
+
+
+<div class="fm-info">
+
+<h2>
 ${p.name}
+</h2>
 
-⚽ ${p.goals||0}
+
+<h3>
+${p.info?.position || "Pozisyon Yok"}
+</h3>
+
+
+<p>
+🏟 ${p.info?.team || "Takım Yok"}
+</p>
+
+
+<div class="performance">
+
+<span>
+⚽ ${p.goals || 0}
+</span>
+
+<span>
+🅰 ${p.assists || 0}
+</span>
+
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+<div class="attribute-section">
+
+
+<h3>
+Teknik
+</h3>
+
+
+${Object.entries(p.stats || {})
+.map(([stat,value])=>{
+
+
+let color =
+value >= 85 
+? "#22c55e"
+:
+value >= 70
+? "#eab308"
+:
+"#ef4444";
+
+
+return `
+
+<div class="attribute">
+
+
+<div class="attribute-title">
+
+<span>
+${stat}
+</span>
+
+
+<strong>
+${value}
+</strong>
+
+
+</div>
+
+
+<div class="bar">
+
+
+<div 
+class="fill"
+style="
+width:${value}%;
+background:${color};
+">
+</div>
+
+
+</div>
+
+
+</div>
+
+
+`;
+
+
+})
+.join("")}
+
 
 </div>
 
 `;
-
 });
 
 

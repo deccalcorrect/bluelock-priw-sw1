@@ -165,5 +165,32 @@ function exportData(){let blob=new Blob([JSON.stringify(db,null,2)],{type:'appli
 function importData(e){let file=e.target.files[0];if(!file)return;let r=new FileReader();r.onload=()=>{try{db=JSON.parse(r.result);save();alert('Veriler içe aktarıldı.')}catch{alert('Geçersiz JSON')}};r.readAsText(file)}
 renderAll();
 </script>
+<script src="js/cloudinary.js"></script>
+<script src="js/app.js"></script>
 </body>
 </html>
+<input type="file" id="photo">
+
+<button onclick="testUpload()">
+Fotoğraf Yükle
+</button>
+
+
+<script>
+
+async function testUpload(){
+
+let file =
+document.getElementById("photo").files[0];
+
+let url =
+await uploadPlayerImage(file);
+
+
+console.log(url);
+
+alert(url);
+
+}
+
+</script>

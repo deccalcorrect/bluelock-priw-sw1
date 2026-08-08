@@ -1,4 +1,4 @@
-import { app, db } from "./firebase.js";
+import { db, auth } from "./firebase.js";
 
 import {
     getAuth,
@@ -20,7 +20,6 @@ from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 // Firebase Auth başlat
 
-const auth = getAuth(app);
 
 
 

@@ -21,6 +21,7 @@
         <button data-page="dashboard" onclick="showPage('dashboard')"><span class="btnLabel">🏠 Ana Sayfa</span></button>
         <button data-page="players" onclick="showPage('players')"><span class="btnLabel">👤 Oyuncular</span></button>
         <button data-page="teams" onclick="showPage('teams')"><span class="btnLabel">🏆 Takımlar</span></button>
+        <button data-page="marketValue" onclick="showPage('marketValue')"><span class="btnLabel">💰 Piyasa Değeri</span></button>
         <button data-page="league" onclick="showPage('league')"><span class="btnLabel">📊 Lig</span></button>
         <button data-page="matchResults" onclick="showPage('matchResults')"><span class="btnLabel">📅 Maç Sonuçları</span></button>
         <button data-page="addPlayer" onclick="showPage('addPlayer')"><span class="btnLabel">➕ Oyuncu Ekle</span></button>
@@ -49,24 +50,51 @@
 
             <div class="cards">
                 <div class="box">
-                    <h3>Oyuncular</h3>
-                    <p id="playerCount">0</p>
-                </div>
-                <div class="box">
                     <h3>Takımlar</h3>
                     <p id="teamCount">0</p>
                 </div>
                 <div class="box">
-                    <h3>Lig Durumu</h3>
-                    <p style="font-size:20px;">Aktif Sezon</p>
+                    <h3>Oyuncular</h3>
+                    <p id="playerCount">0</p>
                 </div>
-                <div class="box kingBox">
-                    <h3>👑 Gol Kralı</h3>
-                    <div id="goalKing">Veri yok</div>
+                <div class="box">
+                    <h3>Maçlar</h3>
+                    <p id="matchCount">0</p>
                 </div>
-                <div class="box kingBox">
-                    <h3>🎯 Asist Kralı</h3>
-                    <div id="assistKing">Veri yok</div>
+                <div class="box">
+                    <h3>Toplam Gol</h3>
+                    <p id="totalGoalsCount">0</p>
+                </div>
+            </div>
+
+            <div class="rankGrid">
+                <div class="panel rankPanel">
+                    <h3>Son Maçlar</h3>
+                    <table>
+                        <thead><tr><th>Tarih</th><th>Maç</th><th>Skor</th></tr></thead>
+                        <tbody id="recentMatchesTable"></tbody>
+                    </table>
+                </div>
+                <div class="panel rankPanel">
+                    <h3>👑 Gol Krallığı</h3>
+                    <table>
+                        <thead><tr><th>Oyuncu</th><th>Takım</th><th>Gol</th></tr></thead>
+                        <tbody id="goalKingTable"></tbody>
+                    </table>
+                </div>
+                <div class="panel rankPanel">
+                    <h3>🎯 Asist Krallığı</h3>
+                    <table>
+                        <thead><tr><th>Oyuncu</th><th>Takım</th><th>Asist</th></tr></thead>
+                        <tbody id="assistKingTable"></tbody>
+                    </table>
+                </div>
+                <div class="panel rankPanel">
+                    <h3>💰 Piyasa Değeri</h3>
+                    <table>
+                        <thead><tr><th>Oyuncu</th><th>Takım</th><th>Değer</th></tr></thead>
+                        <tbody id="marketValueTable"></tbody>
+                    </table>
                 </div>
             </div>
 
@@ -111,6 +139,27 @@
             <h2>🏆 Takımlar</h2>
 
             <div class="cards" id="teamsList"></div>
+
+        </div>
+
+
+        <!-- ============ PİYASA DEĞERİ ============ -->
+        <div id="page-marketValue" class="page hidden">
+
+            <h2>💰 Piyasa Değeri Sıralaması</h2>
+            <p style="color:#64748b;">
+                Değer hesabı: Gol €500.000 · Asist €300.000 · Match-up €100.000 · Kritik Müdahale €400.000
+            </p>
+
+            <div class="forum-list">
+                <div class="forum-header" style="grid-template-columns:60px 2fr 1.3fr 1fr;">
+                    <span></span>
+                    <span>İsim</span>
+                    <span>Takım</span>
+                    <span>Değer</span>
+                </div>
+                <div id="marketValueList"></div>
+            </div>
 
         </div>
 
@@ -297,6 +346,12 @@
                     <select id="buffTeamSelect" onchange="loadTeamBuffForm()"><option value="">Takım Seç</option></select>
 
                     <div id="buffFormArea"></div>
+                </div>
+
+                <div class="panel">
+                    <h3>📩 Stat Talepleri</h3>
+                    <p class="capNote">Misafirlerin oyuncu profillerinden gönderdiği stat güncelleme talepleri.</p>
+                    <div id="statRequestsArea"></div>
                 </div>
 
                 <div class="panel">

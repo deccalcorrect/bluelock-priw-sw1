@@ -34,6 +34,7 @@ body{
     border-right:1px solid #252b3a;
     position:fixed;
     height:100vh;
+    overflow-y:auto;
 
 }
 
@@ -42,7 +43,7 @@ body{
 
     text-align:center;
     margin:0;
-    font-size:28px;
+    font-size:26px;
 
 }
 
@@ -85,6 +86,20 @@ body{
 .sidebar button:hover{
 
     background:#2563eb;
+
+}
+
+.sidebar button.active{
+
+    background:#2563eb;
+    box-shadow:0 0 0 2px #60a5fa inset;
+
+}
+
+.adminNavBtn{
+
+    background:#3b1414 !important;
+    border:1px solid #7f1d1d;
 
 }
 
@@ -139,7 +154,7 @@ body{
 
 .hidden{
 
-    display:none;
+    display:none !important;
 
 }
 
@@ -178,6 +193,7 @@ body{
 .box h3{
 
     color:#94a3b8;
+    margin:0 0 8px 0;
 
 }
 
@@ -188,14 +204,29 @@ body{
     font-size:35px;
 
     color:#3b82f6;
+    margin:0;
+
+}
+
+.box.kingBox p{
+
+    font-size:16px;
+    color:#e2e8f0;
+
+}
+
+.box.kingBox strong{
+
+    display:block;
+    font-size:22px;
+    color:#fbbf24;
+    margin-top:4px;
 
 }
 
 
 
-
-
-/* OYUNCU KARTLARI */
+/* OYUNCU KARTLARI (Takımlar sekmesi) */
 
 
 .player-card{
@@ -226,6 +257,71 @@ body{
 
 }
 
+
+.team-card{
+
+    background:#111827;
+    border-radius:15px;
+    padding:20px;
+    border:1px solid #273244;
+    cursor:pointer;
+    transition:.15s;
+    text-align:center;
+
+}
+
+.team-card:hover{
+
+    border-color:#2563eb;
+    transform:translateY(-3px);
+
+}
+
+.team-card img{
+
+    width:70px;
+    height:70px;
+    object-fit:contain;
+    margin-bottom:10px;
+
+}
+
+.team-card h3{
+
+    margin:6px 0;
+
+}
+
+.team-card .teamMini{
+
+    display:flex;
+    justify-content:center;
+    gap:14px;
+    color:#94a3b8;
+    font-size:13px;
+    margin-top:8px;
+
+}
+
+.buffTagRow{
+
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    justify-content:center;
+    margin-top:10px;
+
+}
+
+.buffTag{
+
+    background:#1e293b;
+    color:#93c5fd;
+    padding:3px 8px;
+    border-radius:20px;
+    font-size:11px;
+
+}
 
 
 
@@ -262,6 +358,13 @@ td,th{
     padding:15px;
 
     border-bottom:1px solid #273244;
+    text-align:left;
+
+}
+
+.leagueTable tr:first-child td{
+
+    background:rgba(37,99,235,.12);
 
 }
 
@@ -303,12 +406,89 @@ textarea{
 }
 
 
+label{
+
+    display:block;
+    color:#94a3b8;
+    font-size:13px;
+    margin-top:14px;
+
+}
+
+
+.formGrid{
+
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:0 20px;
+
+}
+
+
+.panel{
+
+    background:#10141f;
+    border:1px solid #222938;
+    border-radius:14px;
+    padding:22px;
+    margin-bottom:22px;
+
+}
+
+
+hr{
+
+    border:none;
+    border-top:1px solid #263043;
+    margin:20px 0;
+
+}
+
 
 
 
 button{
 
     cursor:pointer;
+
+}
+
+.btn{
+
+    background:#2563eb;
+    color:#fff;
+    border:none;
+    padding:12px 18px;
+    border-radius:8px;
+    font-size:14px;
+    margin-top:14px;
+    margin-right:8px;
+
+}
+
+.btn:hover{
+
+    opacity:.85;
+
+}
+
+.btn.danger{
+
+    background:#dc2626;
+
+}
+
+.btn.ghost{
+
+    background:#1e293b;
+
+}
+
+.btn.small{
+
+    padding:6px 10px;
+    font-size:12px;
+    margin-top:0;
 
 }
 
@@ -328,7 +508,8 @@ button{
 
 
 .sidebar h1,
-.league{
+.league,
+.sidebar button span.btnLabel{
 
     display:none;
 
@@ -347,7 +528,107 @@ button{
 
 
 }
-/* FM OYUNCU PROFİLİ */
+
+
+
+/* =====================================
+   DISCORD FORUM TARZI OYUNCU LİSTESİ
+===================================== */
+
+.forum-header,
+.forum-row{
+
+    display:grid;
+    grid-template-columns:60px 2fr 1.1fr 1.3fr .8fr .6fr .6fr;
+    align-items:center;
+    gap:12px;
+    padding:12px 16px;
+
+}
+
+.forum-header{
+
+    color:#64748b;
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:.5px;
+    border-bottom:1px solid #222938;
+
+}
+
+.forum-list{
+
+    background:#10141f;
+    border:1px solid #222938;
+    border-radius:14px;
+    overflow:hidden;
+
+}
+
+.forum-row{
+
+    border-bottom:1px solid #1c2230;
+    cursor:pointer;
+    transition:.12s;
+
+}
+
+.forum-row:last-child{
+
+    border-bottom:none;
+
+}
+
+.forum-row:hover{
+
+    background:#171d2b;
+
+}
+
+.forum-avatar{
+
+    width:42px;
+    height:42px;
+    border-radius:50%;
+    object-fit:cover;
+    background:#1e293b;
+
+}
+
+.forum-name{
+
+    font-weight:bold;
+
+}
+
+.forum-sub{
+
+    color:#64748b;
+    font-size:12px;
+
+}
+
+.forum-rating{
+
+    font-weight:bold;
+    color:#3b82f6;
+    font-size:18px;
+
+}
+
+.forum-empty{
+
+    padding:30px;
+    text-align:center;
+    color:#64748b;
+
+}
+
+
+
+/* =====================================
+   FM OYUNCU PROFİLİ
+===================================== */
 
 
 .fm-card{
@@ -373,6 +654,7 @@ display:flex;
 gap:25px;
 
 align-items:center;
+flex-wrap:wrap;
 
 }
 
@@ -389,6 +671,8 @@ border-radius:15px;
 object-fit:cover;
 
 border:3px solid #2563eb;
+
+background:#1e293b;
 
 }
 
@@ -407,6 +691,15 @@ margin:0;
 .fm-info h3{
 
 color:#60a5fa;
+margin:4px 0;
+font-weight:normal;
+
+}
+
+.fm-info .fm-meta{
+
+color:#94a3b8;
+font-size:14px;
 
 }
 
@@ -417,6 +710,7 @@ color:#60a5fa;
 display:flex;
 
 gap:20px;
+flex-wrap:wrap;
 
 margin-top:15px;
 
@@ -432,7 +726,7 @@ padding:10px 18px;
 
 border-radius:10px;
 
-font-size:18px;
+font-size:16px;
 
 }
 
@@ -443,6 +737,15 @@ font-size:18px;
 .attribute-section{
 
 margin-top:30px;
+
+}
+
+
+.attribute-section h3{
+
+color:#94a3b8;
+border-bottom:1px solid #222938;
+padding-bottom:10px;
 
 }
 
@@ -463,6 +766,14 @@ display:flex;
 justify-content:space-between;
 
 margin-bottom:5px;
+font-size:14px;
+
+}
+
+.attribute-title span.attVal{
+
+font-weight:bold;
+color:#e2e8f0;
 
 }
 
@@ -487,5 +798,77 @@ overflow:hidden;
 height:100%;
 
 border-radius:20px;
+transition:width .3s;
+
+}
+
+.fill.low{ background:#dc2626; }
+.fill.mid{ background:#f59e0b; }
+.fill.high{ background:#3b82f6; }
+.fill.top{ background:#22c55e; }
+.fill.buffed{ background:linear-gradient(90deg,#a855f7,#22c55e); }
+
+.backBtn{
+
+background:#1e293b;
+color:#fff;
+border:none;
+padding:10px 16px;
+border-radius:8px;
+margin-bottom:18px;
+
+}
+
+
+
+/* =====================================
+   ADMIN PANEL
+===================================== */
+
+.admin-login{
+
+max-width:340px;
+
+}
+
+.buff-grid{
+
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+gap:10px;
+
+}
+
+.buff-grid label{
+
+margin-top:6px;
+
+}
+
+.adminBadge{
+
+background:#dc2626;
+padding:4px 10px;
+border-radius:20px;
+font-size:12px;
+margin-left:8px;
+
+}
+
+.visitorBadge{
+
+background:#334155;
+padding:4px 10px;
+border-radius:20px;
+font-size:12px;
+margin-left:8px;
+
+}
+
+.capNote{
+
+color:#64748b;
+font-size:13px;
+margin-top:8px;
 
 }

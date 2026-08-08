@@ -4,11 +4,17 @@
 <head>
 
 <meta charset="UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Bluelock Priw SW</title>
 
-<link rel="stylesheet" href="css/style.css">
+<title>
+Oyuncu Stat Paneli
+</title>
+
+
+<link rel="stylesheet" href="style.css">
+
 
 </head>
 
@@ -16,203 +22,37 @@
 <body>
 
 
-<div class="layout">
-
-
-<!-- SOL MENÜ -->
-
-<aside class="sidebar">
-
+<header>
 
 <h1>
-⚽ BLUEL0CK
+⚽ Oyuncu Stat Paneli
 </h1>
-
-<p class="league">
-Priw SW
-</p>
-
-
-
-<button onclick="openPage('home')">
-🏠 Ana Sayfa
-</button>
-
-
-<button onclick="openPage('players')">
-👥 Oyuncular
-</button>
-
-
-<button onclick="openPage('teams')">
-🏟 Takımlar
-</button>
-
-
-<button onclick="openPage('table')">
-🏆 Puan Durumu
-</button>
-
-
-<button onclick="openPage('goals')">
-⚽ Gol Krallığı
-</button>
-
-
-<button onclick="openPage('assists')">
-🅰 Asist Krallığı
-</button>
-
-
-<button onclick="openPage('stats')">
-⚡ Hızlı Stat Aktar
-</button>
-
-
-<button onclick="openPage('settings')">
-⚙ Ayarlar
-</button>
-
-
-
-</aside>
-
-
-
-
-
-<!-- ANA ALAN -->
-
-
-<main class="content">
-
-
-
-<header class="topbar">
-
-
-<h2>
-Bluelock Priw SW
-</h2>
-
-
-<div>
-Sezon: 2026
-</div>
-
 
 </header>
 
 
 
-
-
-<section id="home" class="page">
-
-
-<h2>
-Lig Merkezi
-</h2>
-
-
-<div class="cards">
-
-
-<div class="box">
-
-<h3>
-Takımlar
-</h3>
-
-<p>
-0
-</p>
-
-</div>
-
-
-<div class="box">
-
-<h3>
-Oyuncular
-</h3>
-
-<p>
-0
-</p>
-
-</div>
+<main>
 
 
 
-<div class="box">
-
-<h3>
-Maçlar
-</h3>
-
-<p>
-0
-</p>
-
-</div>
+<!-- =========================
+OYUNCU PANELİ
+========================= -->
 
 
-
-</div>
-
-
-</section>
-
-
-
-
-
-
-
-<section id="players" class="page hidden">
+<section class="panel">
 
 
 <h2>
-👥 Oyuncular
+Oyuncu Oluştur
 </h2>
 
 
-<div class="panel">
 
-<h3>Yeni Oyuncu Ekle</h3>
-
-
-<input id="playerName" placeholder="Oyuncu Adı">
-
-
-<input id="playerPosition" placeholder="Pozisyon (ST, MC, GK)">
-
-
-
-<label>
-Takım
-</label>
-
-
-<select id="playerTeam">
-
-<option>
-Takım Seç
-</option>
-
-
-</select>
-
-
-
-<input id="playerAge" placeholder="Yaş">
-
-
-<input id="playerHeight" placeholder="Boy">
-
-
-<input id="playerWeight" placeholder="Kilo">
+<input 
+id="playerName"
+placeholder="Oyuncu adı">
 
 
 
@@ -221,7 +61,7 @@ Oyuncu Fotoğrafı
 </label>
 
 
-<input 
+<input
 type="file"
 id="playerImage"
 accept="image/*"
@@ -229,87 +69,124 @@ accept="image/*"
 
 
 
-<h3>İstatistikler</h3>
+
+<input
+id="playerPosition"
+placeholder="Mevki">
+
+
+
+<input
+id="playerAge"
+placeholder="Yaş">
+
+
+
+<input
+id="playerHeight"
+placeholder="Boy">
+
+
+
+<input
+id="playerWeight"
+placeholder="Kilo">
+
+
+
+
+
+<input
+id="playerGoals"
+type="number"
+placeholder="Gol"
+>
+
+
+
+<input
+id="playerAssists"
+type="number"
+placeholder="Asist"
+>
+
+
+
+<h3>
+Normal Statlar
+</h3>
 
 
 <div id="statsContainer">
-
-
-<div class="stat">
-
-<input class="statName" placeholder="Hız">
-
-<input class="statValue" placeholder="90">
-
-</div>
-
 
 </div>
 
 
 
 <button onclick="addStat()">
+
 + Stat Ekle
+
 </button>
+
+
+
+
+
 <h3>
-💪 Fiziksel Statlar
+Fiziksel Özellikler
 </h3>
+
 
 
 <div id="physicalContainer">
 
-
-<div class="stat">
-
-
-<input 
-class="physicalName" 
-placeholder="Çeviklik">
-
-
-<input 
-class="physicalValue"
-type="number"
-placeholder="90">
-
-
 </div>
 
-
-</div>
 
 
 <button onclick="addPhysicalStat()">
+
 + Fiziksel Stat Ekle
+
 </button>
 
 
-<input id="playerGoals" placeholder="Gol">
-
-<input id="playerAssists" placeholder="Asist">
 
 
 
-<button onclick="savePlayer()" class="save">
+
+<h3>
+Takım Seç
+</h3>
+
+
+
+<select id="playerTeam">
+
+<option value="">
+
+Takım seç
+
+</option>
+
+
+</select>
+
+
+
+
+
+<br><br>
+
+
+
+<button onclick="savePlayer()">
 
 Oyuncuyu Kaydet
 
 </button>
 
-
-</div>
-
-
-
-
-<h3>
-Oyuncu Listesi
-</h3>
-
-
-<div id="playersList">
-
-</div>
 
 
 </section>
@@ -317,39 +194,38 @@ Oyuncu Listesi
 
 
 
+<!-- =========================
+TAKIM OLUŞTURMA
+========================= -->
 
 
-
-
-
-<section id="teams" class="page hidden">
-
-
-<section id="teams" class="page hidden">
+<section class="panel">
 
 
 <h2>
-🏟 Takımlar
+🏟️ Takım Oluştur
 </h2>
 
 
 
-<div class="panel">
+<input
 
-
-<h3>
-Yeni Takım Oluştur
-</h3>
-
-
-<input 
 id="teamName"
-placeholder="Takım adı">
+
+placeholder="Takım adı"
+
+>
 
 
-<input 
+
+<input
+
 id="teamLogo"
-placeholder="Logo URL">
+
+placeholder="Logo URL"
+
+>
+
 
 
 <button onclick="addTeam()">
@@ -359,24 +235,68 @@ Takım Ekle
 </button>
 
 
+
+</section>
+
+
+
+
+
+
+
+
+
+<!-- =========================
+OYUNCULAR
+========================= -->
+
+
+<section class="panel">
+
+
+<h2>
+👤 Oyuncular
+</h2>
+
+
+
+<div id="playersList">
+
+
 </div>
 
 
 
+</section>
 
 
-<h3>
-Takımlar
-</h3>
+
+
+
+
+
+
+
+<!-- =========================
+TAKIMLAR
+========================= -->
+
+
+<section class="panel">
+
+
+<h2>
+🏆 Takımlar
+</h2>
+
 
 
 <div id="teamsList">
 
+
 </div>
 
 
-</section>
-
 
 </section>
 
@@ -384,52 +304,12 @@ Takımlar
 
 
 
+<!-- =========================
+GOL KRALLIĞI
+========================= -->
 
 
-
-
-<section id="table" class="page hidden">
-
-
-<h2>
-🏆 Puan Durumu
-</h2>
-
-
-<table>
-
-
-<tr>
-
-<th>
-Takım
-</th>
-
-<th>
-Puan
-</th>
-
-</tr>
-
-
-<tbody id="tableList">
-
-</tbody>
-
-
-</table>
-
-
-</section>
-
-
-
-
-
-
-
-
-<section id="goals" class="page hidden">
+<section class="panel">
 
 
 <h2>
@@ -437,9 +317,12 @@ Puan
 </h2>
 
 
+
 <div id="goalList">
 
+
 </div>
+
 
 
 </section>
@@ -452,17 +335,25 @@ Puan
 
 
 
-<section id="assists" class="page hidden">
+<!-- =========================
+ASİST KRALLIĞI
+========================= -->
+
+
+<section class="panel">
 
 
 <h2>
-🅰 Asist Krallığı
+🅰️ Asist Krallığı
 </h2>
+
 
 
 <div id="assistList">
 
+
 </div>
+
 
 
 </section>
@@ -474,63 +365,69 @@ Puan
 
 
 
-<section id="stats" class="page hidden">
+
+<!-- =========================
+ADMIN STAT GÜNCELLEME
+========================= -->
+
+
+<section class="panel">
 
 
 <h2>
-⚡ Hızlı Stat Aktar
+🔒 Admin Stat Güncelleme
 </h2>
 
 
 
 <select id="statPlayer">
 
-<option>
-Oyuncu Seç
+
+<option value="">
+
+Oyuncu seç
+
 </option>
+
 
 </select>
 
 
 
+
+
 <textarea
+
 id="statText"
-placeholder="Hız:90
-Pas:85
-Çeviklik:80">
-</textarea>
+
+placeholder="
+Örnek:
+
+Hız:90
+Şut:85
+Pas:88
+
+"
+
+></textarea>
 
 
 
-<button>
-Aktar
+
+
+<button onclick="transferStats()">
+
+Statları Aktar
+
 </button>
 
 
-</section>
-
-
-
-
-
-
-
-
-
-<section id="settings" class="page hidden">
-
-
-<h2>
-⚙ Ayarlar
-</h2>
-
-
-<p>
-Lig ayarları burada olacak.
-</p>
-
 
 </section>
+
+
+
+
 
 
 
@@ -539,44 +436,20 @@ Lig ayarları burada olacak.
 </main>
 
 
-</div>
 
 
 
 
 
 
-<script>
-
-
-function openPage(id){
-
-
-document
-.querySelectorAll(".page")
-.forEach(
-page =>
-page.classList.add("hidden")
-);
-
-
-
-document
-.getElementById(id)
-.classList.remove("hidden");
-
-
-}
-
-
-
+<script 
+type="module"
+src="./App.js">
 </script>
 
 
 
-<script type="module" src="js/app.js"></script>
-
-
 </body>
+
 
 </html>

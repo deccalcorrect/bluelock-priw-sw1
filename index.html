@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FM Lig Paneli</title>
+<style>
+:root{--bg:#11161c;--panel:#1b222a;--panel2:#222b35;--line:#35414d;--text:#e9edf1;--muted:#9da8b3;--accent:#4f9cff;--green:#72c85a;--orange:#ff9d3d}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(135deg,#0d1116,#182029);color:var(--text);font:14px Arial,Helvetica,sans-serif}
+button,input,select{font:inherit}button{cursor:pointer}.app{min-height:100vh}.top{height:72px;background:#0c1116;border-bottom:1px solid #2e3944;display:flex;align-items:center;padding:0 24px;gap:20px}.logo{width:44px;height:44px;border-radius:50%;background:#1557a6;display:grid;place-items:center;font-weight:800;font-size:13px;border:3px solid #eee}.title{font-size:20px;font-weight:700}.sub{color:var(--muted);font-size:12px;margin-top:3px}.top .spacer{flex:1}.top button,.side button{background:none;border:0;color:var(--text)}
+.layout{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 72px)}.side{background:#12181e;border-right:1px solid #2d3741;padding:16px 10px}.nav{display:flex;flex-direction:column;gap:4px}.nav button{text-align:left;padding:12px 14px;border-radius:7px;color:#c8d0d8}.nav button:hover,.nav button.active{background:#25313d;color:white}.content{padding:20px;max-width:1500px;width:100%;margin:auto}.view{display:none}.view.active{display:block}.crumb{color:var(--muted);margin-bottom:8px}.heading{display:flex;align-items:center;gap:14px;margin-bottom:18px}.heading h1{margin:0;font-size:28px}.actions{margin-left:auto;display:flex;gap:8px}.btn{border:1px solid var(--line);background:#26313c;color:white;padding:9px 13px;border-radius:6px}.btn.primary{background:#2879d8;border-color:#4391ed}.btn.danger{background:#7d2f35;border-color:#a43e45}.grid{display:grid;grid-template-columns:1.25fr .75fr;gap:14px}.card{background:rgba(27,34,42,.96);border:1px solid #33404b;border-radius:8px;overflow:hidden}.cardhead{padding:12px 15px;border-bottom:1px solid #33404b;font-weight:700;background:#202932}.table{width:100%;border-collapse:collapse}.table th,.table td{padding:10px 12px;border-bottom:1px solid #303a44;text-align:left}.table th{font-size:11px;text-transform:uppercase;color:#9eabb7}.table tr:hover{background:#242e38}.pill{padding:3px 7px;border-radius:10px;background:#2d3945;color:#d9e2ea;font-size:11px}.stat{font-weight:700;color:#f1f4f6}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}.metric{padding:15px;background:#1c252e;border:1px solid #33404b;border-radius:8px}.metric .n{font-size:26px;font-weight:800;margin-top:5px}.player-head{display:grid;grid-template-columns:190px 1fr 300px;gap:14px}.portrait{min-height:270px;background:linear-gradient(145deg,#252f39,#10151a);display:grid;place-items:center;border:1px solid #35414c}.silhouette{font-size:95px;opacity:.35}.portrait img{width:100%;height:100%;object-fit:cover}.identity{padding:18px}.identity h2{font-size:32px;margin:0 0 5px}.identity .role{color:#6db1ff;font-weight:700;margin-bottom:16px}.meta{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.meta div{background:#202a33;padding:10px;border-radius:5px}.meta small{display:block;color:var(--muted);font-size:10px}.rating{padding:18px}.rating .big{font-size:54px;font-weight:800;color:#8ad16b}.cols{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:14px}.statrow{display:grid;grid-template-columns:1fr 48px;align-items:center;padding:7px 10px;border-bottom:1px solid #303a44}.statrow .v{text-align:right;font-weight:800}.v.high{color:#75cf59}.v.mid{color:#f2bd58}.v.low{color:#e37c70}.modal{position:fixed;inset:0;background:#0009;display:none;align-items:center;justify-content:center;padding:20px;z-index:5}.modal.open{display:flex}.modalbox{width:min(900px,100%);max-height:90vh;overflow:auto;background:#182029;border:1px solid #3c4956;border-radius:10px}.modalhead{padding:16px;border-bottom:1px solid #34404c;display:flex}.modalhead h2{margin:0}.modalbody{padding:18px}.formgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.field label{display:block;color:#aeb8c1;font-size:11px;margin-bottom:5px}.field input,.field select,.field textarea{width:100%;background:#11171d;border:1px solid #394651;color:#fff;padding:9px;border-radius:5px}.field textarea{resize:vertical;line-height:1.5}.sectiontitle{grid-column:1/-1;font-weight:700;color:#6eaff2;border-bottom:1px solid #35414d;padding-bottom:7px;margin-top:5px}.modalfoot{padding:14px 18px;border-top:1px solid #34404c;display:flex;justify-content:flex-end;gap:8px}.teamlist{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.team{padding:18px}.team h3{margin:0 0 8px}.team p{color:var(--muted)}.notice{padding:12px;background:#182e22;border:1px solid #315d3b;color:#bce2c2;border-radius:6px;margin-bottom:14px}
+@media(max-width:900px){.layout{grid-template-columns:1fr}.side{display:none}.grid,.player-head,.cols{grid-template-columns:1fr}.cards{grid-template-columns:repeat(2,1fr)}.teamlist,.formgrid{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.content{padding:10px}.cards,.teamlist,.formgrid{grid-template-columns:1fr}.meta{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="top"><div class="logo">FL</div><div><div class="title" id="leagueName">Elite Lig</div><div class="sub">Özel Futbol Ligi Yönetim Paneli</div></div><div class="spacer"></div><button onclick="exportData()">Veriyi Dışa Aktar</button><button onclick="document.getElementById('importFile').click()">İçe Aktar</button><input id="importFile" type="file" accept=".json" hidden onchange="importData(event)"></header>
+<div class="layout">
+<aside class="side"><nav class="nav">
+<button class="active" data-view="dashboard">⌂ Genel Bakış</button>
+<button data-view="players">♙ Oyuncular</button>
+<button data-view="teams">◈ Takımlar</button>
+<button data-view="league">▤ Puan Durumu</button>
+<button data-view="fixtures">◷ Fikstür</button>
+</nav></aside>
+<main class="content">
+<section id="dashboard" class="view active">
+<div class="heading"><div><div class="crumb">Lig / Genel Bakış</div><h1>Lig Merkezi</h1></div><div class="actions"><button class="btn primary" onclick="newPlayer()">+ Oyuncu</button><button class="btn" onclick="newTeam()">+ Takım</button></div></div>
+<div class="notice">Statlar sınırsızdır. Oyuncular ekranındaki <b>⚡ Hızlı Stat Aktar</b> ile mesajdan doğrudan statları ayrıştırabilirsin. Ortak internet kullanımı için bu siteyi online veritabanına bağlayacağız.</div>
+<div class="cards"><div class="metric">Takımlar<div class="n" id="mTeams">0</div></div><div class="metric">Oyuncular<div class="n" id="mPlayers">0</div></div><div class="metric">Maçlar<div class="n" id="mMatches">0</div></div><div class="metric">Toplam Gol<div class="n" id="mGoals">0</div></div></div>
+<div class="grid"><div class="card"><div class="cardhead">Son Maçlar</div><table class="table" id="recent"></table></div><div class="card"><div class="cardhead">Gol Krallığı</div><table class="table" id="scorers"></table></div></div>
+</section>
+<section id="players" class="view">
+<div class="heading"><div><div class="crumb">Lig / Oyuncular</div><h1>Oyuncular</h1></div><div class="actions"><button class="btn" onclick="quickStats()">⚡ Hızlı Stat Aktar</button><button class="btn primary" onclick="newPlayer()">+ Oyuncu Ekle</button></div></div>
+<div class="card"><table class="table" id="playersTable"></table></div>
+</section>
+<section id="player" class="view">
+<div class="heading"><div><div class="crumb">Lig / Oyuncu</div><h1 id="playerTitle">Oyuncu</h1></div><div class="actions"><button class="btn" onclick="editCurrent()">Düzenle</button><button class="btn danger" onclick="deleteCurrent()">Sil</button></div></div>
+<div id="playerProfile"></div>
+</section>
+<section id="teams" class="view">
+<div class="heading"><div><div class="crumb">Lig / Takımlar</div><h1>Takımlar</h1></div><div class="actions"><button class="btn primary" onclick="newTeam()">+ Takım Ekle</button></div></div>
+<div class="teamlist" id="teamList"></div>
+</section>
+<section id="league" class="view">
+<div class="heading"><div><div class="crumb">Lig / Sıralama</div><h1>Puan Durumu</h1></div></div>
+<div class="card"><table class="table" id="leagueTable"></table></div>
+</section>
+<section id="fixtures" class="view">
+<div class="heading"><div><div class="crumb">Lig / Fikstür</div><h1>Fikstür & Sonuçlar</h1></div><div class="actions"><button class="btn primary" onclick="newMatch()">+ Maç Ekle</button></div></div>
+<div class="card"><table class="table" id="fixtureTable"></table></div>
+</section>
+</main></div></div>
+
+<div class="modal" id="modal"><div class="modalbox"><div class="modalhead"><h2 id="modalTitle">Oyuncu</h2></div><form id="form"><div class="modalbody"><div id="formFields" class="formgrid"></div></div><div class="modalfoot"><button type="button" class="btn" onclick="closeModal()">Vazgeç</button><button class="btn primary">Kaydet</button></div></form></div></div>
+
+
+<div class="modal" id="quickModal"><div class="modalbox"><div class="modalhead"><h2>⚡ Hızlı Stat Aktar</h2></div>
+<div class="modalbody">
+<p style="color:#aeb8c1;margin-top:0">Bir oyuncunun statlarını aşağıya yapıştır. Her satırda <b>Stat: Değer</b> yazması yeterli. Büyük/küçük harf ve Türkçe karakterler sorun değildir.</p>
+<div class="field"><label>Oyuncu</label><select id="quickPlayer"></select></div>
+<div class="field" style="margin-top:12px"><label>Stat metni</label>
+<textarea id="quickText" rows="14" placeholder="Çeviklik: 60&#10;Pas: 85&#10;Bitiricilik: 72&#10;Karar Alma: 91&#10;Hız: 88&#10;Özel Yetenek: 120"></textarea></div>
+<div id="quickPreview" style="margin-top:12px;color:#aeb8c1"></div>
+</div><div class="modalfoot"><button type="button" class="btn" onclick="closeQuick()">Vazgeç</button><button type="button" class="btn" onclick="previewQuick()">Önizle</button><button type="button" class="btn primary" onclick="applyQuick()">Oyuncuya Aktar</button></div>
+</div></div>
+<script>
+const KEY='fm_lig_panel_v1';
+const base={
+league:'Elite Lig',
+teams:[],
+players:[
+{id:'p1',name:'Luke Kriss',team:'psg',age:21,height:176,weight:69,position:'Defansif Orta Saha',foot:'Sol',number:6,overall:194,potential:195,photo:'',stats:{Bitiricilik:14,Dribbling:14,'İlk Kontrol':14,Pas:17,Teknik:16,'Top Kapma':10,'Uzaktan Şut':15,Agresiflik:13,Cesaret:6,Çalışkanlık:16,'Karar Alma':19,Konsantrasyon:12,Vizyon:17,Çeviklik:16,Dayanıklılık:14,Denge:18,Güç:16,Hız:17,Hızlanma:16,Zıplama:11}},
+{id:'p2',name:'Rin Itoshi',team:'bxl',age:18,height:186,weight:76,position:'Forvet',foot:'Sağ',number:10,overall:188,potential:199,photo:'',stats:{Bitiricilik:18,Dribbling:17,'İlk Kontrol':18,Pas:16,Teknik:18,'Top Kapma':9,'Uzaktan Şut':18,Agresiflik:15,Cesaret:15,Çalışkanlık:17,'Karar Alma':18,Konsantrasyon:17,Vizyon:18,Çeviklik:17,Dayanıklılık:15,Denge:15,Güç:16,Hız:18,Hızlanma:18,Zıplama:14}}
+],
+matches:[{id:'m1',home:'psg',away:'bxl',hg:2,ag:1,date:'2028-06-01'},{id:'m2',home:'rbl',away:'brg',hg:1,ag:1,date:'2028-06-02'}]
+};
+let db=JSON.parse(localStorage.getItem(KEY)||'null')||base; let currentPlayer=null;
+function save(){localStorage.setItem(KEY,JSON.stringify(db));renderAll()}
+function teamName(id){return db.teams.find(t=>t.id===id)?.name||'Serbest'}
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>show(b.dataset.view));
+function show(id){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===id));}
+
+function normalizeStatName(s){
+  return s.trim().replace(/\s+/g,' ').toLocaleLowerCase('tr-TR')
+    .split(' ').map(w=>w.charAt(0).toLocaleUpperCase('tr-TR')+w.slice(1)).join(' ');
+}
+function parseStatText(text){
+  const out={};
+  const lines=text.split(/\r?\n/);
+  for(const raw of lines){
+    let line=raw.trim();
+    if(!line) continue;
+    // Accept: Çeviklik: 60 / Çeviklik : 60 / Çeviklik = 60 / Çeviklik - 60
+    let m=line.match(/^(.+?)\s*(?::|=|-)\s*(-?\d+(?:[.,]\d+)?)\s*$/);
+    if(!m){
+      // Also accept "Çeviklik 60" when the final token is numeric
+      m=line.match(/^(.+?)\s+(-?\d+(?:[.,]\d+)?)\s*$/);
+    }
+    if(!m) continue;
+    let name=normalizeStatName(m[1].replace(/^[•*·\-]+\s*/,''));
+    let value=Number(String(m[2]).replace(',','.'));
+    if(name && Number.isFinite(value)) out[name]=value;
+  }
+  return out;
+}
+function quickStats(){
+  if(!db.players.length) return alert('Önce en az bir oyuncu oluştur.');
+  quickPlayer.innerHTML=db.players.map(p=>`<option value="${p.id}">${esc(p.name)} — ${esc(teamName(p.team))}</option>`).join('');
+  quickText.value='';
+  quickPreview.textContent='';
+  quickModal.classList.add('open');
+}
+function closeQuick(){quickModal.classList.remove('open')}
+function previewQuick(){
+  const stats=parseStatText(quickText.value);
+  const entries=Object.entries(stats);
+  quickPreview.innerHTML=entries.length
+    ? `<b>${entries.length} stat bulundu:</b> `+entries.map(([k,v])=>`${esc(k)} = <b>${v}</b>`).join(' · ')
+    : 'Stat bulunamadı. Örnek: <b>Çeviklik: 60</b>';
+}
+function applyQuick(){
+  const p=db.players.find(x=>x.id===quickPlayer.value);
+  if(!p) return alert('Oyuncu seçilemedi.');
+  const stats=parseStatText(quickText.value);
+  if(!Object.keys(stats).length) return alert('Aktarılacak stat bulunamadı.');
+  Object.assign(p.stats,stats);
+  closeQuick();
+  save();
+  openPlayer(p.id);
+  alert(`${Object.keys(stats).length} stat ${p.name} oyuncusuna aktarıldı.`);
+}
+
+function renderAll(){
+document.getElementById('leagueName').textContent=db.league;
+mTeams.textContent=db.teams.length;mPlayers.textContent=db.players.length;mMatches.textContent=db.matches.length;mGoals.textContent=db.matches.reduce((a,m)=>a+m.hg+m.ag,0);
+recent.innerHTML='<tr><th>Tarih</th><th>Maç</th><th>Skor</th></tr>'+db.matches.slice(-6).reverse().map(m=>`<tr><td>${m.date}</td><td>${esc(teamName(m.home))} - ${esc(teamName(m.away))}</td><td class="stat">${m.hg} - ${m.ag}</td></tr>`).join('');
+let sc=[...db.players].sort((a,b)=>b.stats.Bitiricilik-a.stats.Bitiricilik).slice(0,6);scorers.innerHTML='<tr><th>Oyuncu</th><th>Takım</th><th>Bit.</th></tr>'+sc.map(p=>`<tr><td><a href="#" onclick="openPlayer('${p.id}');return false">${esc(p.name)}</a></td><td>${esc(teamName(p.team))}</td><td class="stat">${p.stats.Bitiricilik}</td></tr>`).join('');
+playersTable.innerHTML='<tr><th>Oyuncu</th><th>Takım</th><th>Pozisyon</th><th>Yaş</th><th>OVR</th><th>POT</th></tr>'+db.players.map(p=>`<tr onclick="openPlayer('${p.id}')" style="cursor:pointer"><td><b>${esc(p.name)}</b></td><td>${esc(teamName(p.team))}</td><td>${esc(p.position)}</td><td>${p.age}</td><td class="stat">${p.overall}</td><td class="stat">${p.potential}</td></tr>`).join('');
+teamList.innerHTML=db.teams.map(t=>`<div class="card team"><h3>${esc(t.name)}</h3><p>${db.players.filter(p=>p.team===t.id).length} oyuncu</p><button class="btn" onclick="editTeam('${t.id}')">Düzenle</button></div>`).join('');
+let rows=standings();leagueTable.innerHTML='<tr><th>#</th><th>Takım</th><th>O</th><th>G</th><th>B</th><th>M</th><th>AG</th><th>YG</th><th>AV</th><th>P</th></tr>'+rows.map((x,i)=>`<tr><td>${i+1}</td><td><b>${esc(x.name)}</b></td><td>${x.o}</td><td>${x.w}</td><td>${x.d}</td><td>${x.l}</td><td>${x.gf}</td><td>${x.ga}</td><td>${x.gf-x.ga}</td><td class="stat">${x.p}</td></tr>`).join('');
+fixtureTable.innerHTML='<tr><th>Tarih</th><th>Ev</th><th>Skor</th><th>Deplasman</th></tr>'+db.matches.map(m=>`<tr><td>${m.date}</td><td>${esc(teamName(m.home))}</td><td><b>${m.hg} - ${m.ag}</b></td><td>${esc(teamName(m.away))}</td></tr>`).join('');
+}
+function standings(){let a=db.teams.map(t=>({id:t.id,name:t.name,o:0,w:0,d:0,l:0,gf:0,ga:0,p:0}));db.matches.forEach(m=>{let h=a.find(x=>x.id===m.home),v=a.find(x=>x.id===m.away);if(!h||!v)return;h.o++;v.o++;h.gf+=m.hg;h.ga+=m.ag;v.gf+=m.ag;v.ga+=m.hg;if(m.hg>m.ag){h.w++;h.p+=3;v.l++}else if(m.hg<m.ag){v.w++;v.p+=3;h.l++}else{h.d++;v.d++;h.p++;v.p++}});return a.sort((x,y)=>y.p-x.p||(y.gf-y.ga)-(x.gf-x.ga))}
+function openPlayer(id){currentPlayer=db.players.find(p=>p.id===id);if(!currentPlayer)return;playerTitle.textContent=currentPlayer.name;renderProfile();show('player')}
+function renderProfile(){let p=currentPlayer;let groups={Teknik:['Bitiricilik','Dribbling','İlk Kontrol','Pas','Teknik','Top Kapma','Uzaktan Şut'],Zihinsel:['Agresiflik','Cesaret','Çalışkanlık','Karar Alma','Konsantrasyon','Vizyon'],Fiziksel:['Çeviklik','Dayanıklılık','Denge','Güç','Hız','Hızlanma','Zıplama']};
+let known=new Set(Object.values(groups).flat()); 
+let custom=Object.keys(p.stats).filter(s=>!known.has(s));
+if(custom.length) groups['Özel / Ek Statlar']=custom;
+let cols=Object.entries(groups).map(([g,ss])=>`<div class="card"><div class="cardhead">${g}</div>${ss.map(s=>{let v=p.stats[s]??0;return `<div class="statrow"><span>${esc(s)}</span><span class="v ${v>=75?'high':v>=40?'mid':'low'}">${v}</span></div>`}).join('')}</div>`).join('');
+playerProfile.innerHTML=`<div class="player-head"><div class="portrait">${p.photo?`<img src="${p.photo}">`:`<div class="silhouette">⚽</div>`}</div><div class="card identity"><h2>${esc(p.name)}</h2><div class="role">${esc(p.position)} · ${esc(teamName(p.team))}</div><div class="meta"><div><small>Yaş</small>${p.age}</div><div><small>Boy</small>${p.height} cm</div><div><small>Kilo</small>${p.weight} kg</div><div><small>Forma</small>${p.number||'-'}</div><div><small>Ayak</small>${esc(p.foot)}</div><div><small>OVR</small>${p.overall}</div></div></div><div class="card rating"><small>Mevcut Yetenek</small><div class="big">${p.overall}</div><small>Potansiyel Yetenek</small><div class="big">${p.potential}</div></div></div><div class="cols">${cols}</div>`;
+}
+function fieldsPlayer(p={}){let statNames=['Hız','Defans','Pas','Vuruş','Top Kontrol','Çalım','Algı','Şut Menzili','Pas Menzili','Kas Yapısı','Refleks','Çeviklik','Esneklik','Dayanıklılık','Zayıf Ayak'];let basic=[['name','İsim',p.name||''],['age','Yaş',p.age??18],['height','Boy',p.height??180],['weight','Kilo',p.weight??75],['position','Pozisyon',p.position||'Orta Saha'],['foot','Ayak',p.foot||'Sağ'],['number','Forma No',p.number??10],['overall','Mevcut Yetenek',p.overall??100],['potential','Potansiyel Yetenek',p.potential??100]];let h=basic.map(([k,l,v])=>`<div class="field"><label>${l}</label><input name="${k}" value="${esc(v)}"></div>`).join('');h+=`<div class="field"><label>Oyuncu Fotoğrafı</label><input type="file" name="photo" accept="image/*"></div>`;h+=`<div class="sectiontitle">STATLAR · SINIRSIZ</div>`;h+=statNames.map(s=>`<div class="field"><label>${s}</label><input type="number" name="s_${s}" value="${p.stats?.[s]??0}"></div>`).join('');h+=`<div class="field"><label>Takım</label><select name="team"><option value="">Serbest</option>${db.teams.map(t=>`<option value="${t.id}" ${p.team===t.id?'selected':''}>${esc(t.name)}</option>`).join('')}</select></div>`;return h}
+function readPhoto(file,cb){if(!file)return cb('');let r=new FileReader();r.onload=()=>cb(r.result);r.readAsDataURL(file)}
+function newPlayer(){currentPlayer=null;modalTitle.textContent='Yeni Oyuncu';formFields.innerHTML=fieldsPlayer();modal.classList.add('open');form.onsubmit=e=>{e.preventDefault();let f=new FormData(form),p={id:'p'+Date.now(),name:f.get('name'),age:+f.get('age'),height:+f.get('height'),weight:+f.get('weight'),position:f.get('position'),foot:f.get('foot'),number:+f.get('number'),overall:+f.get('overall'),potential:+f.get('potential'),team:f.get('team'),photo:'',stats:{}};for(let [k,v] of f)if(k.startsWith('s_'))p.stats[k.slice(2)]=+v;readPhoto(f.get('photo'),img=>{p.photo=img;db.players.push(p);closeModal();save()})}}
+function editCurrent(){if(!currentPlayer)return;modalTitle.textContent='Oyuncuyu Düzenle';formFields.innerHTML=fieldsPlayer(currentPlayer);modal.classList.add('open');form.onsubmit=e=>{e.preventDefault();let f=new FormData(form);Object.assign(currentPlayer,{name:f.get('name'),age:+f.get('age'),height:+f.get('height'),weight:+f.get('weight'),position:f.get('position'),foot:f.get('foot'),number:+f.get('number'),overall:+f.get('overall'),potential:+f.get('potential'),team:f.get('team')});for(let [k,v] of f)if(k.startsWith('s_'))currentPlayer.stats[k.slice(2)]=+v;readPhoto(f.get('photo'),img=>{if(img)currentPlayer.photo=img;closeModal();save();renderProfile();});playerTitle.textContent=currentPlayer.name}}
+function deleteCurrent(){if(currentPlayer&&confirm('Bu oyuncu silinsin mi?')){db.players=db.players.filter(p=>p.id!==currentPlayer.id);currentPlayer=null;save();show('players')}}
+function newTeam(){let name=prompt('Takım adı?');if(name){db.teams.push({id:'t'+Date.now(),name});save()}}
+function editTeam(id){let t=db.teams.find(x=>x.id===id),n=prompt('Takım adı',t.name);if(n){t.name=n;save()}}
+function newMatch(){if(db.teams.length<2)return alert('Önce en az 2 takım oluştur.');let h=prompt('Ev sahibi takım: '+db.teams.map(t=>t.name).join(', '));let home=db.teams.find(t=>t.name.toLowerCase()===h?.toLowerCase());let a=prompt('Deplasman takım: '+db.teams.map(t=>t.name).join(', '));let away=db.teams.find(t=>t.name.toLowerCase()===a?.toLowerCase());if(!home||!away||home.id===away.id)return alert('Takımları doğru gir.');let hg=+prompt('Ev golü',0),ag=+prompt('Deplasman golü',0);db.matches.push({id:'m'+Date.now(),home:home.id,away:away.id,hg,ag,date:new Date().toISOString().slice(0,10)});save()}
+function closeModal(){modal.classList.remove('open')}
+function exportData(){let blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='elite-lig-verileri.json';a.click()}
+function importData(e){let file=e.target.files[0];if(!file)return;let r=new FileReader();r.onload=()=>{try{db=JSON.parse(r.result);save();alert('Veriler içe aktarıldı.')}catch{alert('Geçersiz JSON')}};r.readAsText(file)}
+renderAll();
+</script>
+</body>
+</html>

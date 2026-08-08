@@ -22,15 +22,37 @@ import {
 
 const ADMIN_PASSWORD = "bluelock2026";
 
-// Temel 6 stat (FM tarzı profil için)
+// Oyuncu Statları + Fiziksel Statlar (FM tarzı profil için)
+// Not: Şut Menzili ve Pas Menzili burada YOK — bunlar manuel girilmez,
+// Vuruş ve Pas statlarından otomatik hesaplanır (bkz. computeRangeStats).
 const CORE_STATS = [
-    { key: "hiz", label: "Sürat" },
-    { key: "sut", label: "Şut" },
+    { key: "hiz", label: "Hız" },
+    { key: "defans", label: "Defans" },
     { key: "pas", label: "Pas" },
-    { key: "dribbling", label: "Dribbling" },
-    { key: "savunma", label: "Savunma" },
-    { key: "fizik", label: "Fizik" }
+    { key: "vurus", label: "Vuruş" },
+    { key: "topKontrol", label: "Top Kontrol" },
+    { key: "calim", label: "Çalım" },
+    { key: "algi", label: "Algı" },
+    { key: "kasYapisi", label: "Kas Yapısı" },
+    { key: "refleks", label: "Refleks" },
+    { key: "ceviklik", label: "Çeviklik" },
+    { key: "esneklik", label: "Esneklik" },
+    { key: "dayaniklilik", label: "Dayanıklılık" },
+    { key: "zayifAyak", label: "Zayıf Ayak" }
 ];
+
+// Otomatik hesaplanan menzil statları
+// Şut Menzili: Base 20m, her 100 Vuruş statında +5
+// Pas Menzili: Base 30m, her 50 Pas statında +5
+function computeRangeStats(effectiveStats) {
+    const vurus = Number(effectiveStats.vurus || 0);
+    const pas = Number(effectiveStats.pas || 0);
+
+    return {
+        sutMenzili: 20 + Math.floor(vurus / 100) * 5,
+        pasMenzili: 30 + Math.floor(pas / 50) * 5
+    };
+}
 
 const DEFAULT_STAT_CAP = 60;
 
@@ -541,6 +563,16 @@ window.openPlayer = async function (id) {
         `;
     }).join("");
 
+    const ranges = computeRangeStats(effective);
+    const rangeRows = `
+        <div class="attribute">
+            <div class="attribute-title"><span>Şut Menzili</span><span class="attVal">${ranges.sutMenzili}m</span></div>
+        </div>
+        <div class="attribute">
+            <div class="attribute-title"><span>Pas Menzili</span><span class="attVal">${ranges.pasMenzili}m</span></div>
+        </div>
+    `;
+
     const extraStatsHtml = Object.entries(player.extraStats || {}).map(([key, val]) => `
         <div class="attribute">
             <div class="attribute-title"><span>${escapeHtml(key)}</span><span class="attVal">${val}</span></div>
@@ -571,6 +603,7 @@ window.openPlayer = async function (id) {
         <div class="attribute-section">
             <h3>Öznitelikler ${team ? `<span class="capNote">(${escapeHtml(team.name)} buff'ları dahil)</span>` : ""}</h3>
             ${attributeRows}
+            ${rangeRows}
         </div>
 
         ${extraStatsHtml ? `<div class="attribute-section"><h3>Ek Statlar</h3>${extraStatsHtml}</div>` : ""}
@@ -887,6 +920,8 @@ window.loadMatchTeams = async function () {
 };
 
 window.saveTeam = async function () {
+    if (!isAdmin) { alert("Bu işlem için admin yetkisi gerekli"); return; }
+
     const name = value("teamName");
     const logo = value("teamLogo");
 

@@ -21,7 +21,6 @@
         <button data-page="dashboard" onclick="showPage('dashboard')"><span class="btnLabel">🏠 Ana Sayfa</span></button>
         <button data-page="players" onclick="showPage('players')"><span class="btnLabel">👤 Oyuncular</span></button>
         <button data-page="teams" onclick="showPage('teams')"><span class="btnLabel">🏆 Takımlar</span></button>
-        <button data-page="fixtures" onclick="showPage('fixtures')"><span class="btnLabel">🎲 Maç İddia</span></button>
         <button data-page="marketValue" onclick="showPage('marketValue')"><span class="btnLabel">💰 Piyasa Değeri</span></button>
         <button data-page="league" onclick="showPage('league')"><span class="btnLabel">📊 Lig</span></button>
         <button data-page="matchResults" onclick="showPage('matchResults')"><span class="btnLabel">📅 Maç Sonuçları</span></button>
@@ -143,20 +142,6 @@
 
             <div class="cards" id="teamsList"></div>
 
-        </div>
-
-
-        <!-- ============ MAÇ İDDİA (FİKSTÜRLER & BAHİS) ============ -->
-        <div id="page-fixtures" class="page hidden">
-
-            <h2>🎲 Maç İddia</h2>
-
-            <div class="panel">
-                <h3>Fikstürler</h3>
-                <div id="fixturesList"></div>
-            </div>
-
-            <div id="fixtureDetailArea"></div>
         </div>
 
 
@@ -407,25 +392,6 @@
                     <h3>📩 Stat Talepleri</h3>
                     <p class="capNote">Misafirlerin oyuncu profillerinden gönderdiği stat güncelleme talepleri.</p>
                     <div id="statRequestsArea"></div>
-                </div>
-
-                <div class="panel">
-                    <h3>Fikstür Yönetimi (Admin)</h3>
-                    <div class="formGrid">
-                        <div>
-                            <label>Ev Sahibi</label>
-                            <select id="fixtureHomeTeam"><option value="">Takım Seç</option></select>
-                        </div>
-                        <div>
-                            <label>Deplasman</label>
-                            <select id="fixtureAwayTeam"><option value="">Takım Seç</option></select>
-                        </div>
-                        <div>
-                            <label>Tarih / Saat</label>
-                            <input id="fixtureDate" type="datetime-local">
-                        </div>
-                    </div>
-                    <button class="btn" onclick="createFixture()">Fikstür Ekle</button>
                 </div>
 
                 <div class="panel">

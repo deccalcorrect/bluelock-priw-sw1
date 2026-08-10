@@ -215,7 +215,8 @@ const PAGE_TITLES = {
     matchDetail: "Maç Detayı",
     addPlayer: "Oyuncu Ekle",
     addTeam: "Takım Ekle",
-    admin: "Admin Paneli"
+    admin: "Admin Paneli",
+    fixtures: "Maç İddia"
 };
 
 window.showPage = function (pageId) {
@@ -240,6 +241,7 @@ window.showPage = function (pageId) {
     if (pageId === "matchResults") { loadMatches(); loadMatchTeams(); renderLiveMatches("liveMatchesArea"); }
     if (pageId === "addPlayer") { loadTeamSelect(); renderCoreStatInputs(); }
     if (pageId === "admin") renderAdminPage();
+    if (pageId === "fixtures") loadFixtures();
 };
 
 
@@ -498,7 +500,9 @@ async function createPlayerData() {
         assists: 0,
         yellowCards: 0,
         redCards: 0,
-        createdAt: new Date()
+        createdAt: new Date(),
+        // Başlangıç bakiyesi (karakter başı)
+        balance: 100000
     };
 }
 
@@ -662,6 +666,7 @@ window.openPlayer = async function (id) {
                     <span>🛡 ${player.criticalInterventions || 0} Kritik Müdahale</span>
                     <span>🟨 ${player.yellowCards || 0}</span>
                     <span>🟥 ${player.redCards || 0}</span>
+                    <span>💵 Bakiye: <strong>${formatEuro(player.balance || 0)}</strong></span>
                 </div>
             </div>
         </div>
@@ -1938,6 +1943,395 @@ window.resolveStatRequest = async function (id) {
 
 
 
+
+
+// =====================================
+// FIKSTÜR (FIXTURES) ve BAHİS (BETS) SİSTEMİ
+// =====================================
+
+// Fikstür oluştur (admin)
+window.createFixture = async function () {
+    if (!isAdmin) { alert("Yetkin yok"); return; }
+
+    const home = value("fixtureHomeTeam");
+    const away = value("fixtureAwayTeam");
+    const dateStr = value("fixtureDate"); // datetime-local value
+
+    if (!home || !away) { alert("İki takım seç"); return; }
+    if (home === away) { alert("Aynı takım seçilemez"); return; }
+
+    const homeT = await getTeamById(home);
+    const awayT = await getTeamById(away);
+    if (!homeT || !awayT) return;
+
+    await addDoc(collection(db, "fixtures"), {
+        homeId: home, awayId: away,
+        homeName: homeT.name, awayName: awayT.name,
+        date: dateStr ? new Date(dateStr) : null,
+        status: "scheduled",
+        options: [], // { id, text, odds, result: null|true|false }
+        createdAt: new Date()
+    });
+
+    alert("Fikstür eklendi");
+    loadFixtures();
+};
+
+// Load fixtures (public list)
+window.loadFixtures = async function () {
+    const area = document.getElementById("fixturesList");
+    if (!area) return;
+
+    const snap = await getDocs(collection(db, "fixtures"));
+    const fixtures = [];
+    snap.forEach(item => fixtures.push({ id: item.id, ...item.data() }));
+
+    // Tarihe göre sırala (yakın tarihten itibaren)
+    fixtures.sort((a,b) => {
+        const ta = a.date?.toMillis ? a.date.toMillis() : (a.createdAt?.toMillis ? a.createdAt.toMillis() : 0);
+        const tb = b.date?.toMillis ? b.date.toMillis() : (b.createdAt?.toMillis ? b.createdAt.toMillis() : 0);
+        return ta - tb;
+    });
+
+    if (!fixtures.length) {
+        area.innerHTML = `<div class="forum-empty">Henüz fikstür eklenmedi.</div>`;
+        return;
+    }
+
+    area.innerHTML = fixtures.map(f => {
+        const d = f.date?.toDate ? f.date.toDate().toLocaleString("tr-TR") : "-";
+        return `
+        <div class="fm-card" style="margin-bottom:12px;cursor:pointer;" onclick="openFixture('${f.id}')">
+            <div class="fm-header" style="justify-content:space-between;">
+                <div class="fm-info">
+                    <h3>${escapeHtml(f.homeName)} vs ${escapeHtml(f.awayName)}</h3>
+                    <div class="fm-meta">${d} · ${escapeHtml(f.status || 'scheduled')}</div>
+                </div>
+                ${isAdmin ? `<div style="display:flex;gap:8px;">
+                    <button class="btn small" onclick="event.stopPropagation();openFixture('${f.id}')">Düzenle</button>
+                    <button class="btn danger small" onclick="event.stopPropagation();deleteFixture('${f.id}')">Sil</button>
+                </div>` : `<button class="btn small" onclick="event.stopPropagation();openFixture('${f.id}')">Detay</button>`}
+            </div>
+        </div>
+        `;
+    }).join("");
+};
+
+window.deleteFixture = async function (id) {
+    if (!isAdmin) { alert("Yetkin yok"); return; }
+    if (!confirm("Fikstür silinsin mi?")) return;
+    await deleteDoc(doc(db, "fixtures", id));
+    loadFixtures();
+};
+
+// Aç / detay (kamuya bahis yapma arayüzü; admin için düzenleme ve seçenek çözme)
+window.openFixture = async function (fixtureId) {
+    const ref = doc(db, "fixtures", fixtureId);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) return alert("Fikstür bulunamadı");
+
+    const f = { id: fixtureId, ...snap.data() };
+
+    // Yüklenecek oyuncu listesi (bahis yapan karakter seçimi için)
+    const players = await getPlayersRanking();
+
+    const optionsHtml = (f.options || []).map(opt => `
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <div>
+                <strong>${escapeHtml(opt.text)}</strong> — <span style="color:#60a5fa;">${opt.odds}x</span>
+                ${opt.result === true ? `<span style="margin-left:8px;color:#22c55e;">(KAZANDI)</span>` : opt.result === false ? `<span style="margin-left:8px;color:#ef4444;">(KAYBETTI)</span>` : ""}
+            </div>
+            <div style="display:flex;gap:6px;align-items:center;">
+                ${isAdmin ? `<button class="btn small" onclick="event.stopPropagation();showOptionResultForm('${fixtureId}','${opt.id}')">Sonucu Gir</button>` : ""}
+                <button class="btn small" onclick="event.stopPropagation();openPlaceBetModal('${fixtureId}','${opt.id}')">Bahis Yap</button>
+            </div>
+        </div>
+    `).join("") || `<div class="capNote">Bu fikstürde henüz bahis seçeneği yok.</div>`;
+
+    // Admin için seçenek ekleme formu görünür
+    const adminAddOptionHtml = isAdmin ? `
+        <hr>
+        <h4>Yeni Bahis Seçeneği Ekle (Admin)</h4>
+        <label>Seçenek Açıklama</label>
+        <input id="optText" placeholder="Örn: Kırmızı kart olur">
+        <label>Oran (örn 1.5)</label>
+        <input id="optOdds" type="number" step="0.1" min="1.1" max="2.9" value="1.5">
+        <button class="btn" onclick="addFixtureOption('${fixtureId}')">Seçeneği Ekle</button>
+    ` : "";
+
+    const betModalHtml = `
+        <div id="placeBetModal" class="modal hidden" style="position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;z-index:999;">
+            <div style="background:#161b22;padding:25px;border-radius:15px;max-width:500px;width:90%;max-height:90%;overflow:auto;">
+                <span style="float:right;cursor:pointer;font-size:22px;" onclick="closeModal('placeBetModal')">×</span>
+                <div id="placeBetArea"></div>
+            </div>
+        </div>
+    `;
+
+    const detailArea = document.getElementById("fixtureDetailArea");
+    if (!detailArea) return;
+    detailArea.innerHTML = `
+        <div class="fm-card">
+            <div class="fm-header" style="justify-content:space-between;">
+                <div class="fm-info">
+                    <h2>${escapeHtml(f.homeName)} vs ${escapeHtml(f.awayName)}</h2>
+                    <div class="fm-meta">${f.date?.toDate ? f.date.toDate().toLocaleString("tr-TR") : "-"}</div>
+                </div>
+                ${isAdmin ? `<div style="display:flex;gap:8px;">
+                    <button class="btn" onclick="resolveFixture('${fixtureId}')">Fikstürü Bitir (Çözümlenmişse)</button>
+                </div>` : ""}
+            </div>
+
+            <div class="attribute-section">
+                <h3>Bahis Seçenekleri</h3>
+                ${optionsHtml}
+                ${adminAddOptionHtml}
+            </div>
+        </div>
+        ${betModalHtml}
+    `;
+
+    // Show page if needed
+    showPage("fixtures");
+};
+
+// Admin: fixture option ekle
+window.addFixtureOption = async function (fixtureId) {
+    if (!isAdmin) { alert("Yetkin yok"); return; }
+
+    const text = value("optText");
+    const odds = Number(value("optOdds"));
+
+    if (!text) { alert("Açıklama gir"); return; }
+    if (!odds || odds < 1.1 || odds > 2.9) { alert("Oran 1.1 ile 2.9 arası olmalı"); return; }
+
+    const ref = doc(db, "fixtures", fixtureId);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) return;
+
+    const f = snap.data();
+    const options = f.options || [];
+    // benzersiz id
+    const optId = "opt_" + Date.now() + "_" + Math.random().toString(16).slice(2);
+    options.push({ id: optId, text, odds, result: null });
+
+    await updateDoc(ref, { options });
+    alert("Seçenek eklendi");
+    openFixture(fixtureId);
+};
+
+// Kullanıcı: bahis modal aç / doldur
+window.openPlaceBetModal = async function (fixtureId, optionId) {
+    const ref = doc(db, "fixtures", fixtureId);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) return alert("Fikstür bulunamadı");
+    const f = { id: fixtureId, ...snap.data() };
+
+    const opt = (f.options || []).find(o => o.id === optionId);
+    if (!opt) return alert("Seçenek bulunamadı");
+
+    // load players list for selection
+    const players = await getPlayersRanking();
+    if (!players.length) return alert("Henüz karakter yok");
+
+    const placeArea = document.getElementById("placeBetArea");
+    if (!placeArea) return;
+
+    placeArea.innerHTML = `
+        <h3>Bahis Yap</h3>
+        <div>
+            <label>Fikstür: </label>
+            <div><strong>${escapeHtml(f.homeName)} vs ${escapeHtml(f.awayName)}</strong></div>
+        </div>
+        <div>
+            <label>Seçenek</label>
+            <div><strong>${escapeHtml(opt.text)} — ${opt.odds}x</strong></div>
+        </div>
+        <label>Karakter (Hangi karakter hesabından bahis koyuyorsun)</label>
+        <select id="betPlayerSelect">
+            ${players.map(p => `<option value="${p.id}">${escapeHtml(p.name)} — ${formatEuro(p.balance)}</option>`).join("")}
+        </select>
+        <label>Miktar</label>
+        <input id="betAmount" type="number" min="1" value="1000">
+        <div style="margin-top:12px;">
+            <button class="btn" onclick="placeBet('${fixtureId}','${optionId}')">Onayla</button>
+            <button class="btn ghost" onclick="closeModal('placeBetModal')">İptal</button>
+        </div>
+    `;
+
+    // göster
+    const modal = document.getElementById("placeBetModal");
+    if (modal) modal.classList.remove("hidden");
+};
+
+// placeBet: bakiye kontrol, bakiye düş, bet dokümanı oluştur
+window.placeBet = async function (fixtureId, optionId) {
+    const playerId = value("betPlayerSelect");
+    const amount = Number(value("betAmount") || 0);
+    if (!playerId) { alert("Karakter seç"); return; }
+    if (!amount || amount <= 0) { alert("Geçerli miktar gir"); return; }
+
+    const pRef = doc(db, "players", playerId);
+    const pSnap = await getDoc(pRef);
+    if (!pSnap.exists()) return alert("Karakter bulunamadı");
+
+    const player = pSnap.data();
+    const balance = Number(player.balance || 0);
+    if (amount > balance) return alert("Yetersiz bakiye");
+
+    // fixture & option mevcut mu?
+    const fRef = doc(db, "fixtures", fixtureId);
+    const fSnap = await getDoc(fRef);
+    if (!fSnap.exists()) return alert("Fikstür bulunamadı");
+    const f = fSnap.data();
+    const opt = (f.options || []).find(o => o.id === optionId);
+    if (!opt) return alert("Seçenek bulunamadı");
+
+    // bakiye düş
+    await updateDoc(pRef, { balance: Number(balance - amount) });
+
+    // bet dokümanı oluştur
+    await addDoc(collection(db, "bets"), {
+        fixtureId,
+        optionId,
+        playerId,
+        amount,
+        odds: opt.odds,
+        placedAt: new Date(),
+        status: "pending",
+        payout: 0
+    });
+
+    alert("Bahis yapıldı");
+    closeModal("placeBetModal");
+    openFixture(fRef.id);
+};
+
+// Admin: bir option için sonucu gir (kazandı/kaybetti)
+window.showOptionResultForm = function (fixtureId, optionId) {
+    const result = prompt("Seçenek sonucu: 'won' ise kazandı, 'lost' ise kaybetti. (won/lost)");
+    if (!result) return;
+    if (result !== "won" && result !== "lost") return alert("won veya lost yaz");
+    const isWin = result === "won";
+    setOptionResult(fixtureId, optionId, isWin);
+};
+
+async function setOptionResult(fixtureId, optionId, isWin) {
+    if (!isAdmin) { alert("Yetkin yok"); return; }
+
+    const ref = doc(db, "fixtures", fixtureId);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) return alert("Fikstür bulunamadı");
+
+    const f = snap.data();
+    const options = (f.options || []).map(o => o.id === optionId ? { ...o, result: isWin } : o);
+
+    await updateDoc(ref, { options });
+
+    // işlem: o seçeneğe ait bahisleri çöz
+    await processBetsForOption(fixtureId, optionId, isWin);
+
+    alert("Sonuç kaydedildi ve bahisler işlendi");
+    openFixture(fixtureId);
+}
+
+// İşle: bets collection'da fixtureId+optionId ile pending olanları al, kazananlara payout ver, kaybedenleri lost yap
+async function processBetsForOption(fixtureId, optionId, isWin) {
+    // get pending bets
+    const snap = await getDocs(collection(db, "bets"));
+    const bets = [];
+    snap.forEach(b => {
+        const d = b.data();
+        if (d.fixtureId === fixtureId && d.optionId === optionId && d.status === "pending") {
+            bets.push({ id: b.id, ...d });
+        }
+    });
+
+    for (const bet of bets) {
+        const betRef = doc(db, "bets", bet.id);
+        if (isWin) {
+            const payout = Math.round(Number(bet.amount) * Number(bet.odds));
+            // oyuncunun balance'ını arttır
+            const pRef = doc(db, "players", bet.playerId);
+            await updateDoc(pRef, { balance: increment(payout) });
+            await updateDoc(betRef, { status: "won", payout });
+        } else {
+            await updateDoc(betRef, { status: "lost", payout: 0 });
+        }
+    }
+}
+
+// Admin: fikstür tamamla (status -> finished) ve tüm seçenekleri için pending olanları kaybetmiş say (opsiyonel)
+window.resolveFixture = async function (fixtureId) {
+    if (!isAdmin) { alert("Yetkin yok"); return; }
+    // Sadece admin için: bitmemişse finished yap
+    const ref = doc(db, "fixtures", fixtureId);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) return;
+    await updateDoc(ref, { status: "finished", finishedAt: new Date() });
+    alert("Fikstür finished olarak işaretlendi. (Seçenek sonuçlarını girerek bahisleri çözmelisin.)");
+    openFixture(fixtureId);
+};
+
+
+// =====================================
+// ADMIN SAYFASINDA FIKSTÜR VE TAKIM SELECTLERİNİ DOLDURMA
+// =====================================
+
+async function populateAdminTeamSelects() {
+    const fh = document.getElementById("fixtureHomeTeam");
+    const fa = document.getElementById("fixtureAwayTeam");
+    const buffSelect = document.getElementById("buffTeamSelect");
+
+    const teams = await getTeamsData();
+
+    if (fh) {
+        fh.innerHTML = `<option value="">Takım Seç</option>`;
+        teams.forEach(team => {
+            fh.innerHTML += `<option value="${team.id}">${escapeHtml(team.name)}</option>`;
+        });
+    }
+    if (fa) {
+        fa.innerHTML = `<option value="">Takım Seç</option>`;
+        teams.forEach(team => {
+            fa.innerHTML += `<option value="${team.id}">${escapeHtml(team.name)}</option>`;
+        });
+    }
+    if (buffSelect) {
+        // buff select doldurma zaten renderAdminPage yapıyor, ama çift garantileme
+        buffSelect.innerHTML = `<option value="">Takım Seç</option>`;
+        teams.forEach(team => {
+            buffSelect.innerHTML += `<option value="${team.id}">${escapeHtml(team.name)}</option>`;
+        });
+    }
+}
+
+
+// =====================================
+// MODAL KAPATMA
+// =====================================
+
+window.closeModal = function (id) {
+    const modal = document.getElementById(id);
+    if (modal) modal.classList.add("hidden");
+};
+
+
+// =====================================
+// YETKİYİ UYGULA (adminOnly elemanlar)
+// =====================================
+
+function applyPermissions() {
+    document.querySelectorAll(".adminOnly").forEach(el => {
+        el.style.display = isAdmin ? "" : "none";
+    });
+}
+
+
+// =====================================
+// ADMIN PAGE RENDER (Güncellendi)
+// =====================================
+
 async function renderAdminPage() {
     const loginBox = document.getElementById("adminLoginBox");
     const toolsBox = document.getElementById("adminToolsBox");
@@ -1958,6 +2352,9 @@ async function renderAdminPage() {
             });
         }
 
+        // Ayrıca fixture için admin selectleri doldur
+        await populateAdminTeamSelects();
+
         document.getElementById("buffFormArea").innerHTML = "";
 
         loadStatRequests();
@@ -1967,54 +2364,7 @@ async function renderAdminPage() {
     }
 }
 
-window.loadTeamBuffForm = async function () {
-    const teamId = value("buffTeamSelect");
-    const area = document.getElementById("buffFormArea");
-    if (!area) return;
-
-    if (!teamId) { area.innerHTML = ""; return; }
-
-    const team = await getTeamById(teamId);
-    if (!team) return;
-
-    const buffs = team.buffs || {};
-
-    area.innerHTML = `
-        <div class="buff-grid">
-            ${CORE_STATS.map(s => `
-                <div>
-                    <label>${s.label} Buff</label>
-                    <input class="teamBuffInput" data-stat="${s.key}" type="number" value="${buffs[s.key] || 0}">
-                </div>
-            `).join("")}
-        </div>
-        <button class="btn" onclick="saveTeamBuff('${teamId}')">Buffları Kaydet</button>
-    `;
-};
-
-window.saveTeamBuff = async function (teamId) {
-    if (!isAdmin) { alert("Yetkin yok"); return; }
-
-    const buffs = {};
-    document.querySelectorAll(".teamBuffInput").forEach(input => {
-        buffs[input.dataset.stat] = Number(input.value || 0);
-    });
-
-    await updateDoc(doc(db, "teams", teamId), { buffs });
-
-    alert("Takım buffları güncellendi");
-    loadTeams();
-};
-
-
-// =====================================
-// MODAL KAPATMA
-// =====================================
-
-window.closeModal = function (id) {
-    const modal = document.getElementById(id);
-    if (modal) modal.classList.add("hidden");
-};
+window.renderAdminPage = renderAdminPage;
 
 
 // =====================================

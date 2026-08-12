@@ -21,9 +21,11 @@
         <button data-page="dashboard" onclick="showPage('dashboard')"><span class="btnLabel">🏠 Ana Sayfa</span></button>
         <button data-page="players" onclick="showPage('players')"><span class="btnLabel">👤 Oyuncular</span></button>
         <button data-page="teams" onclick="showPage('teams')"><span class="btnLabel">🏆 Takımlar</span></button>
-        <button data-page="marketValue" onclick="showPage('marketValue')"><span class="btnLabel">💰 Piyasa Değeri</span></button>
         <button data-page="league" onclick="showPage('league')"><span class="btnLabel">📊 Lig</span></button>
         <button data-page="matchResults" onclick="showPage('matchResults')"><span class="btnLabel">📅 Maç Sonuçları</span></button>
+        <button data-page="goalKing" onclick="showPage('goalKing')"><span class="btnLabel">👑 Gol Krallığı</span></button>
+        <button data-page="assistKing" onclick="showPage('assistKing')"><span class="btnLabel">🎯 Asist Krallığı</span></button>
+        <button data-page="marketValue" onclick="showPage('marketValue')"><span class="btnLabel">💰 Piyasa Değeri</span></button>
         <button data-page="addPlayer" onclick="showPage('addPlayer')"><span class="btnLabel">➕ Oyuncu Ekle</span></button>
         <button data-page="addTeam" onclick="showPage('addTeam')"><span class="btnLabel">➕ Takım Ekle</span></button>
         <button class="adminNavBtn" data-page="admin" onclick="showPage('admin')"><span class="btnLabel">🔐 Admin Paneli</span></button>
@@ -141,6 +143,42 @@
             <h2>🏆 Takımlar</h2>
 
             <div class="cards" id="teamsList"></div>
+
+        </div>
+
+
+        <!-- ============ GOL KRALLIĞI ============ -->
+        <div id="page-goalKing" class="page hidden">
+
+            <h2>👑 Gol Krallığı</h2>
+
+            <div class="forum-list">
+                <div class="forum-header" style="grid-template-columns:60px 2fr 1.3fr 1fr;">
+                    <span></span>
+                    <span>İsim</span>
+                    <span>Takım</span>
+                    <span>Gol</span>
+                </div>
+                <div id="goalKingList"></div>
+            </div>
+
+        </div>
+
+
+        <!-- ============ ASİST KRALLIĞI ============ -->
+        <div id="page-assistKing" class="page hidden">
+
+            <h2>🎯 Asist Krallığı</h2>
+
+            <div class="forum-list">
+                <div class="forum-header" style="grid-template-columns:60px 2fr 1.3fr 1fr;">
+                    <span></span>
+                    <span>İsim</span>
+                    <span>Takım</span>
+                    <span>Asist</span>
+                </div>
+                <div id="assistKingList"></div>
+            </div>
 
         </div>
 

@@ -207,6 +207,8 @@ const PAGE_TITLES = {
     players: "Oyuncular",
     playerProfile: "Oyuncu Profili",
     teams: "Takımlar",
+    goalKing: "Gol Krallığı",
+    assistKing: "Asist Krallığı",
     marketValue: "Piyasa Değeri",
     teamDetail: "Takım Detayı",
     league: "Lig",
@@ -235,6 +237,8 @@ window.showPage = function (pageId) {
     if (pageId === "dashboard") { renderLiveMatches("dashboardLiveArea"); }
     if (pageId === "players") loadPlayers();
     if (pageId === "teams") loadTeams();
+    if (pageId === "goalKing") loadGoalKingList();
+    if (pageId === "assistKing") loadAssistKingList();
     if (pageId === "marketValue") loadMarketValueList();
     if (pageId === "league") { loadLeagueTable(); }
     if (pageId === "matchResults") { loadMatches(); loadMatchTeams(); renderLiveMatches("liveMatchesArea"); }
@@ -936,6 +940,38 @@ window.openTeam = async function (id) {
         ${isAdmin ? `<button class="btn danger" onclick="deleteTeam('${id}')">Takımı Sil</button>` : ""}
     </div>
 
+    <div class="panel">
+        <h3>📅 Fikstür</h3>
+        <div id="teamFixturesArea"><div class="forum-empty">Yükleniyor...</div></div>
+
+        ${isAdmin ? `
+        <hr>
+        <p class="capNote">Yeni fikstür maçı ekle.</p>
+        <div class="formGrid">
+            <div>
+                <label>Rakip Takım</label>
+                <select id="fixtureOpponent"><option value="">Takım Seç</option></select>
+            </div>
+            <div>
+                <label>Tarih</label>
+                <input id="fixtureDate" type="date">
+            </div>
+            <div>
+                <label>Saha</label>
+                <select id="fixtureVenue">
+                    <option value="home">Ev Sahibi</option>
+                    <option value="away">Deplasman</option>
+                </select>
+            </div>
+            <div>
+                <label>Not (opsiyonel)</label>
+                <input id="fixtureNote" placeholder="Örn: Yarı Final">
+            </div>
+        </div>
+        <button class="btn" onclick="addTeamFixture('${id}')">Fikstür Ekle</button>
+        ` : ""}
+    </div>
+
     ${isAdmin ? `
     <div class="panel">
         <h3>Takım İstatistik Düzenle (Admin)</h3>
@@ -953,6 +989,9 @@ window.openTeam = async function (id) {
     `;
 
     showPage("teamDetail");
+
+    renderTeamFixtures(id);
+    if (isAdmin) loadFixtureOpponentSelect(id);
 };
 
 window.editTeamName = async function (id) {
@@ -991,6 +1030,87 @@ window.deleteTeam = async function (id) {
     await deleteDoc(doc(db, "teams", id));
     showPage("teams");
     updateDashboard();
+};
+
+
+// =====================================
+// TAKIM FİKSTÜRÜ
+// =====================================
+
+window.loadFixtureOpponentSelect = async function (teamId) {
+    const select = document.getElementById("fixtureOpponent");
+    if (!select) return;
+
+    select.innerHTML = `<option value="">Takım Seç</option>`;
+
+    const teams = await getTeamsData();
+    teams
+        .filter(t => t.id !== teamId)
+        .forEach(t => {
+            select.innerHTML += `<option value="${t.id}">${escapeHtml(t.name)}</option>`;
+        });
+};
+
+window.renderTeamFixtures = async function (teamId) {
+    const area = document.getElementById("teamFixturesArea");
+    if (!area) return;
+
+    const snap = await getDocs(collection(db, "teams", teamId, "fixtures"));
+    const fixtures = [];
+    snap.forEach(item => fixtures.push({ id: item.id, ...item.data() }));
+
+    if (!fixtures.length) {
+        area.innerHTML = `<div class="forum-empty">Henüz fikstür eklenmedi.</div>`;
+        return;
+    }
+
+    fixtures.sort((a, b) => (a.date || "").localeCompare(b.date || ""));
+
+    area.innerHTML = fixtures.map(f => `
+        <div class="leagueRow" style="background:#111827;padding:12px 16px;border-radius:10px;margin:5px 0;display:flex;justify-content:space-between;align-items:center;">
+            <div>
+                <strong>${f.isHome ? "🏠 " + escapeHtml(f.opponentName) : "✈️ " + escapeHtml(f.opponentName)}</strong>
+                <span class="forum-sub" style="margin-left:10px;">${f.date ? escapeHtml(f.date) : "Tarih belirtilmedi"}${f.note ? " · " + escapeHtml(f.note) : ""}</span>
+            </div>
+            ${isAdmin ? `<button class="btn danger small" onclick="deleteTeamFixture('${teamId}','${f.id}')">Sil</button>` : ""}
+        </div>
+    `).join("");
+};
+
+window.addTeamFixture = async function (teamId) {
+    if (!isAdmin) { alert("Yetkin yok"); return; }
+
+    const opponentId = value("fixtureOpponent");
+    const date = value("fixtureDate");
+    const venue = value("fixtureVenue");
+    const note = value("fixtureNote");
+
+    if (!opponentId) { alert("Rakip takım seç"); return; }
+    if (opponentId === teamId) { alert("Takım kendisiyle eşleşemez"); return; }
+
+    const opponent = await getTeamById(opponentId);
+    if (!opponent) return;
+
+    await addDoc(collection(db, "teams", teamId, "fixtures"), {
+        opponentId,
+        opponentName: opponent.name,
+        date,
+        isHome: venue === "home",
+        note,
+        createdAt: new Date()
+    });
+
+    clear("fixtureDate");
+    clear("fixtureNote");
+    renderTeamFixtures(teamId);
+};
+
+window.deleteTeamFixture = async function (teamId, fixtureId) {
+    if (!isAdmin) { alert("Yetkin yok"); return; }
+    if (!confirm("Bu fikstür maçı silinsin mi?")) return;
+
+    await deleteDoc(doc(db, "teams", teamId, "fixtures", fixtureId));
+    renderTeamFixtures(teamId);
 };
 
 
@@ -1838,6 +1958,66 @@ window.renderMarketValueTable = async function () {
     `);
 
     area.innerHTML = tableRowsHtml(3, rows, "Veri yok");
+};
+
+window.loadGoalKingList = async function () {
+    const area = document.getElementById("goalKingList");
+    if (!area) return;
+
+    const [players, teams] = await Promise.all([getPlayersRanking(), getTeamsData()]);
+    const teamMap = {};
+    teams.forEach(t => teamMap[t.id] = t);
+
+    const ranked = players.filter(p => (p.goals || 0) > 0);
+
+    if (!ranked.length) {
+        area.innerHTML = `<div class="forum-empty">Henüz gol atan oyuncu yok.</div>`;
+        return;
+    }
+
+    ranked.sort((a, b) => (b.goals || 0) - (a.goals || 0));
+
+    area.innerHTML = ranked.map((p, i) => {
+        const team = teamMap[p.teamId];
+        return `
+        <div class="forum-row" style="grid-template-columns:60px 2fr 1.3fr 1fr;" onclick="openPlayer('${p.id}')">
+            <span class="rankNum">${i + 1}</span>
+            <span class="forum-name">${escapeHtml(p.name)}</span>
+            <span class="forum-sub">${escapeHtml(team ? team.name : "Takımsız")}</span>
+            <span class="forum-rating">${p.goals || 0}</span>
+        </div>
+        `;
+    }).join("");
+};
+
+window.loadAssistKingList = async function () {
+    const area = document.getElementById("assistKingList");
+    if (!area) return;
+
+    const [players, teams] = await Promise.all([getPlayersRanking(), getTeamsData()]);
+    const teamMap = {};
+    teams.forEach(t => teamMap[t.id] = t);
+
+    const ranked = players.filter(p => (p.assists || 0) > 0);
+
+    if (!ranked.length) {
+        area.innerHTML = `<div class="forum-empty">Henüz asist yapan oyuncu yok.</div>`;
+        return;
+    }
+
+    ranked.sort((a, b) => (b.assists || 0) - (a.assists || 0));
+
+    area.innerHTML = ranked.map((p, i) => {
+        const team = teamMap[p.teamId];
+        return `
+        <div class="forum-row" style="grid-template-columns:60px 2fr 1.3fr 1fr;" onclick="openPlayer('${p.id}')">
+            <span class="rankNum">${i + 1}</span>
+            <span class="forum-name">${escapeHtml(p.name)}</span>
+            <span class="forum-sub">${escapeHtml(team ? team.name : "Takımsız")}</span>
+            <span class="forum-rating">${p.assists || 0}</span>
+        </div>
+        `;
+    }).join("");
 };
 
 window.loadMarketValueList = async function () {

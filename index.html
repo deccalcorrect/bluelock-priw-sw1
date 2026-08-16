@@ -23,6 +23,7 @@
         <button data-page="teams" onclick="showPage('teams')"><span class="btnLabel">🏆 Takımlar</span></button>
         <button data-page="league" onclick="showPage('league')"><span class="btnLabel">📊 Lig</span></button>
         <button data-page="matchResults" onclick="showPage('matchResults')"><span class="btnLabel">📅 Maç Sonuçları</span></button>
+        <button class="adminOnly" data-page="matchSim" onclick="showPage('matchSim')"><span class="btnLabel">🎮 Maç Simülatörü</span></button>
         <button data-page="goalKing" onclick="showPage('goalKing')"><span class="btnLabel">👑 Gol Krallığı</span></button>
         <button data-page="assistKing" onclick="showPage('assistKing')"><span class="btnLabel">🎯 Asist Krallığı</span></button>
         <button data-page="marketValue" onclick="showPage('marketValue')"><span class="btnLabel">💰 Piyasa Değeri</span></button>
@@ -313,6 +314,47 @@
             <button class="backBtn" onclick="showPage('matchResults')">← Maç Sonuçlarına Dön</button>
 
             <div id="matchControlArea"></div>
+
+        </div>
+
+
+        <!-- ============ MAÇ SİMÜLATÖRÜ (SADECE ADMIN) ============ -->
+        <div id="page-matchSim" class="page hidden">
+
+            <h2>🎮 Maç Simülatörü</h2>
+            <p style="color:#64748b;">İki takımın kadrosunu gir, Claude maçı canlı anlatım tarzında simüle etsin.</p>
+
+            <div class="panel">
+                <label>Claude API Anahtarı</label>
+                <input id="simApiKey" type="password" placeholder="sk-ant-...">
+                <p class="capNote">Anahtar sadece bu tarayıcıda saklanır ve isteği doğrudan Anthropic API'sine gönderir; sunucumuzda tutulmaz. Yine de bu alanı güvendiğin admin cihazları dışında doldurma.</p>
+            </div>
+
+            <div class="formGrid" style="grid-template-columns:1fr 1fr;align-items:start;">
+                <div class="panel">
+                    <h3>Takım A</h3>
+                    <label>Takımdan Otomatik Doldur</label>
+                    <select id="simTeamASelect"><option value="">Takım Seç</option></select>
+                    <button class="btn ghost small" onclick="fillSimRoster('A')">Kadroyu Getir</button>
+                    <label>Kadro / Plot Bilgisi</label>
+                    <textarea id="simTeamA" placeholder="Oyuncu: ...&#10;Mevki: ...&#10;Plot: ..."></textarea>
+                </div>
+                <div class="panel">
+                    <h3>Takım B</h3>
+                    <label>Takımdan Otomatik Doldur</label>
+                    <select id="simTeamBSelect"><option value="">Takım Seç</option></select>
+                    <button class="btn ghost small" onclick="fillSimRoster('B')">Kadroyu Getir</button>
+                    <label>Kadro / Plot Bilgisi</label>
+                    <textarea id="simTeamB" placeholder="Oyuncu: ...&#10;Mevki: ...&#10;Plot: ..."></textarea>
+                </div>
+            </div>
+
+            <button class="btn" id="simRunBtn" onclick="runMatchSimulation()">⚽ Maçı Simüle Et</button>
+
+            <div class="panel" style="margin-top:20px;">
+                <h3>📺 Canlı Anlatım</h3>
+                <pre id="simOutput" style="white-space:pre-wrap;font-family:inherit;max-height:600px;overflow:auto;margin:0;"></pre>
+            </div>
 
         </div>
 

@@ -322,13 +322,10 @@
         <div id="page-matchSim" class="page hidden">
 
             <h2>🎮 Maç Simülatörü</h2>
-            <p style="color:#64748b;">İki takımın kadrosunu gir, Claude maçı canlı anlatım tarzında simüle etsin.</p>
-
-            <div class="panel">
-                <label>Claude API Anahtarı</label>
-                <input id="simApiKey" type="password" placeholder="sk-ant-...">
-                <p class="capNote">Anahtar sadece bu tarayıcıda saklanır ve isteği doğrudan Anthropic API'sine gönderir; sunucumuzda tutulmaz. Yine de bu alanı güvendiğin admin cihazları dışında doldurma.</p>
-            </div>
+            <p style="color:#64748b;">
+                Bu araç ücretsizdir — kendi API anahtarı gerekmez. Akış: kadroları hazırla → Claude'da (bu sohbet
+                veya claude.ai) ücretsiz simüle et → çıkan anlatımı kopyalayıp aşağıya yapıştır ve maç olarak kaydet.
+            </p>
 
             <div class="formGrid" style="grid-template-columns:1fr 1fr;align-items:start;">
                 <div class="panel">
@@ -349,11 +346,43 @@
                 </div>
             </div>
 
-            <button class="btn" id="simRunBtn" onclick="runMatchSimulation()">⚽ Maçı Simüle Et</button>
+            <button class="btn" onclick="copySimRosters()">📋 Kadroları Kopyala</button>
+            <p class="capNote">
+                Kopyaladıktan sonra bu sohbetteki ücretsiz "Maç Simülatörü" aracına ya da claude.ai'deki bir sohbete
+                yapıştır. Sistem promptu ayrıca oraya kurulu — sen sadece kadroları yapıştırman yeterli.
+            </p>
 
-            <div class="panel" style="margin-top:20px;">
-                <h3>📺 Canlı Anlatım</h3>
-                <pre id="simOutput" style="white-space:pre-wrap;font-family:inherit;max-height:600px;overflow:auto;margin:0;"></pre>
+            <details style="margin:14px 0;">
+                <summary style="cursor:pointer;color:#94a3b8;">Sistem promptunu görüntüle / kopyala (başka bir araçta kullanacaksan)</summary>
+                <button class="btn ghost small" style="margin-top:10px;" onclick="copySimSystemPrompt()">Sistem Promptunu Kopyala</button>
+            </details>
+
+            <div class="panel" style="margin-top:10px;">
+                <h3>📺 Anlatımı Yapıştır ve Maç Olarak Kaydet</h3>
+
+                <div class="formGrid">
+                    <div>
+                        <label>Ev Sahibi</label>
+                        <select id="simHomeTeam"><option value="">Takım Seç</option></select>
+                    </div>
+                    <div>
+                        <label>Deplasman</label>
+                        <select id="simAwayTeam"><option value="">Takım Seç</option></select>
+                    </div>
+                    <div>
+                        <label>Ev Sahibi Gol</label>
+                        <input id="simHomeGoals" type="number" value="0">
+                    </div>
+                    <div>
+                        <label>Deplasman Gol</label>
+                        <input id="simAwayGoals" type="number" value="0">
+                    </div>
+                </div>
+
+                <label>Simülasyon Anlatımı (Claude'un çıktısını buraya yapıştır)</label>
+                <textarea id="simNarrative" style="min-height:250px;" placeholder="12' Sağ kanatta topu alan..."></textarea>
+
+                <button class="btn" onclick="saveSimulatedMatch()">Maçı ve Anlatımı Kaydet</button>
             </div>
 
         </div>

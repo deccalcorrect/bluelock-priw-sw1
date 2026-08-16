@@ -246,8 +246,6 @@ window.showPage = function (pageId) {
     if (pageId === "matchSim") {
         if (!isAdmin) { showPage("dashboard"); return; }
         loadSimTeamSelects();
-        const savedKey = localStorage.getItem("bluelockSimApiKey");
-        if (savedKey) set("simApiKey", savedKey);
     }
     if (pageId === "addPlayer") { loadTeamSelect(); renderCoreStatInputs(); }
     if (pageId === "admin") renderAdminPage();
@@ -1586,6 +1584,13 @@ function renderMatchDetail(match) {
             <h3>Dakika Dakika</h3>
             ${events.length ? events.map(ev => renderEventLine(ev)).join("") : `<div class="capNote">Bu maçta henüz olay kaydedilmedi.</div>`}
         </div>
+
+        ${match.narrative ? `
+        <div class="attribute-section">
+            <h3>📺 Maç Anlatımı</h3>
+            <pre style="white-space:pre-wrap;font-family:inherit;color:#e2e8f0;margin:0;">${escapeHtml(match.narrative)}</pre>
+        </div>
+        ` : ""}
     </div>
     `;
 }
@@ -3050,7 +3055,7 @@ window.loadSimTeamSelects = async function () {
     const optionsHtml = `<option value="">Takım Seç</option>` +
         teams.map(t => `<option value="${t.id}">${escapeHtml(t.name)}</option>`).join("");
 
-    ["simTeamASelect", "simTeamBSelect"].forEach(id => {
+    ["simTeamASelect", "simTeamBSelect", "simHomeTeam", "simAwayTeam"].forEach(id => {
         const select = document.getElementById(id);
         if (select) select.innerHTML = optionsHtml;
     });
@@ -3086,95 +3091,102 @@ window.fillSimRoster = async function (slot) {
     set(textareaId, `**${team.name}**\n\n${rosterText}`);
 };
 
-async function streamClaudeMessage(apiKey, systemPrompt, userMessage, onChunk) {
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "x-api-key": apiKey,
-            "anthropic-version": "2023-06-01",
-            "anthropic-dangerous-direct-browser-access": "true"
-        },
-        body: JSON.stringify({
-            model: "claude-sonnet-4-6",
-            max_tokens: 8000,
-            system: systemPrompt,
-            stream: true,
-            messages: [{ role: "user", content: userMessage }]
-        })
-    });
-
-    if (!response.ok || !response.body) {
-        const errText = await response.text().catch(() => "");
-        throw new Error(`API isteği başarısız (${response.status}): ${errText}`);
-    }
-
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = "";
-
-    while (true) {
-        const { done, value: chunkValue } = await reader.read();
-        if (done) break;
-
-        buffer += decoder.decode(chunkValue, { stream: true });
-        const lines = buffer.split("\n");
-        buffer = lines.pop();
-
-        for (const line of lines) {
-            if (!line.startsWith("data:")) continue;
-            const jsonStr = line.slice(5).trim();
-            if (!jsonStr) continue;
-
-            try {
-                const evt = JSON.parse(jsonStr);
-                if (evt.type === "content_block_delta" && evt.delta?.type === "text_delta") {
-                    onChunk(evt.delta.text);
-                }
-                if (evt.type === "error") {
-                    throw new Error(evt.error?.message || "API hatası");
-                }
-            } catch (e) {
-                if (e instanceof SyntaxError) continue; // parçalı JSON satırı, yoksay
-                throw e;
-            }
-        }
+async function copyToClipboard(text) {
+    try {
+        await navigator.clipboard.writeText(text);
+        return true;
+    } catch (e) {
+        // Panoya erişim engellenmişse elle seçim için bir textarea üzerinden dene
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        let ok = false;
+        try { ok = document.execCommand("copy"); } catch (e2) { ok = false; }
+        document.body.removeChild(ta);
+        return ok;
     }
 }
 
-window.runMatchSimulation = async function () {
-    if (!isAdmin) { alert("Yetkin yok"); return; }
-
-    const apiKey = value("simApiKey");
+window.copySimRosters = async function () {
     const teamA = value("simTeamA");
     const teamB = value("simTeamB");
 
-    if (!apiKey) { alert("Claude API anahtarını gir"); return; }
-    if (!teamA || !teamB) { alert("İki takımın da kadro/plot bilgisini gir"); return; }
+    if (!teamA || !teamB) { alert("Önce iki takımın da kadro/plot bilgisini doldur"); return; }
 
-    localStorage.setItem("bluelockSimApiKey", apiKey);
+    const combined = `${teamA}\n\n---\n\n${teamB}`;
+    const ok = await copyToClipboard(combined);
+    alert(ok ? "Kadrolar panoya kopyalandı. Şimdi bu sohbetteki ücretsiz simülatöre veya claude.ai'ye yapıştırabilirsin." : "Kopyalama başarısız oldu, metni elle seçip kopyalaman gerekebilir.");
+};
 
-    const output = document.getElementById("simOutput");
-    const btn = document.getElementById("simRunBtn");
-    if (!output || !btn) return;
+window.copySimSystemPrompt = async function () {
+    const ok = await copyToClipboard(MATCH_SIM_SYSTEM_PROMPT);
+    alert(ok ? "Sistem promptu kopyalandı." : "Kopyalama başarısız oldu, metni elle seçip kopyalaman gerekebilir.");
+};
 
-    output.textContent = "";
-    btn.disabled = true;
-    btn.textContent = "Simüle ediliyor...";
+window.saveSimulatedMatch = async function () {
+    if (!isAdmin) { alert("Yetkin yok"); return; }
 
-    const userMessage = `${teamA}\n\n---\n\n${teamB}`;
+    const home = value("simHomeTeam");
+    const away = value("simAwayTeam");
+    const homeGoals = Number(value("simHomeGoals"));
+    const awayGoals = Number(value("simAwayGoals"));
+    const narrative = value("simNarrative");
 
-    try {
-        await streamClaudeMessage(apiKey, MATCH_SIM_SYSTEM_PROMPT, userMessage, (chunk) => {
-            output.textContent += chunk;
-            output.scrollTop = output.scrollHeight;
-        });
-    } catch (err) {
-        output.textContent += `\n\n[HATA] ${err.message}`;
-    } finally {
-        btn.disabled = false;
-        btn.textContent = "⚽ Maçı Simüle Et";
-    }
+    if (!home || !away) { alert("Ev sahibi ve deplasman takımını seç"); return; }
+    if (home === away) { alert("Aynı takım seçilemez"); return; }
+    if (!narrative) { alert("Simülasyon anlatımını yapıştır"); return; }
+
+    const homeRef = doc(db, "teams", home);
+    const awayRef = doc(db, "teams", away);
+
+    const homeSnap = await getDoc(homeRef);
+    const awaySnap = await getDoc(awayRef);
+    if (!homeSnap.exists() || !awaySnap.exists()) return;
+
+    const h = homeSnap.data();
+    const a = awaySnap.data();
+
+    let hPoints = h.points || 0, aPoints = a.points || 0;
+    let hWins = h.wins || 0, aWins = a.wins || 0;
+    let hDraws = h.draws || 0, aDraws = a.draws || 0;
+    let hLoss = h.losses || 0, aLoss = a.losses || 0;
+
+    if (homeGoals > awayGoals) { hPoints += 3; hWins++; aLoss++; }
+    else if (homeGoals < awayGoals) { aPoints += 3; aWins++; hLoss++; }
+    else { hPoints += 1; aPoints += 1; hDraws++; aDraws++; }
+
+    await updateDoc(homeRef, {
+        points: hPoints, wins: hWins, draws: hDraws, losses: hLoss,
+        goals: (h.goals || 0) + homeGoals, conceded: (h.conceded || 0) + awayGoals
+    });
+
+    await updateDoc(awayRef, {
+        points: aPoints, wins: aWins, draws: aDraws, losses: aLoss,
+        goals: (a.goals || 0) + awayGoals, conceded: (a.conceded || 0) + homeGoals
+    });
+
+    await addDoc(collection(db, "matches"), {
+        homeId: home, awayId: away,
+        homeName: h.name, awayName: a.name,
+        homeGoals, awayGoals,
+        narrative,
+        createdAt: new Date()
+    });
+
+    clear("simHomeGoals");
+    clear("simAwayGoals");
+    clear("simNarrative");
+    set("simHomeGoals", "0");
+    set("simAwayGoals", "0");
+
+    alert("Maç ve anlatım kaydedildi.");
+
+    loadLeagueTable();
+    loadMatches();
+    loadTeams();
 };
 
 

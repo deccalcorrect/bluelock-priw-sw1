@@ -14,7 +14,8 @@ import {
     setDoc,
     deleteDoc,
     onSnapshot,
-    increment
+    increment,
+    writeBatch
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 
@@ -158,6 +159,85 @@ window.adminLogout = function () {
     renderAdminPage();
     updateDashboard();
     showPage("dashboard");
+};
+
+
+// =====================================
+// HERŞEYİ SIFIRLA (ADMIN)
+// =====================================
+// Tüm oyuncuları ve maçları siler, takımların lig istatistiklerini
+// (puan, galibiyet, beraberlik, mağlubiyet, gol, yediği gol) 0'a çeker.
+// Takımların kendisi (isim/logo/buff) ve stat sınırı ayarı SİLİNMEZ.
+
+async function deleteWholeCollection(colName) {
+    const snap = await getDocs(collection(db, colName));
+
+    const docs = snap.docs;
+    const CHUNK = 400; // Firestore batch limiti 500, güvenli pay bırakıyoruz
+
+    for (let i = 0; i < docs.length; i += CHUNK) {
+        const batch = writeBatch(db);
+        docs.slice(i, i + CHUNK).forEach(d => batch.delete(d.ref));
+        await batch.commit();
+    }
+
+    return docs.length;
+}
+
+window.resetEverything = async function () {
+    if (!isAdmin) { alert("Yetkin yok"); return; }
+
+    const confirm1 = confirm(
+        "DİKKAT: Bu işlem TÜM oyuncuları ve TÜM maç sonuçlarını kalıcı olarak silecek, " +
+        "lig tablosunu (puan/galibiyet/beraberlik/mağlubiyet/gol) sıfırlayacak.\n\n" +
+        "Takımların kendisi (isim/logo) silinmeyecek.\n\n" +
+        "Devam etmek istiyor musun?"
+    );
+    if (!confirm1) return;
+
+    const confirm2 = prompt('Emin misin? Onaylamak için "SIFIRLA" yaz:');
+    if (confirm2 !== "SIFIRLA") {
+        alert("İşlem iptal edildi.");
+        return;
+    }
+
+    try {
+        const deletedPlayers = await deleteWholeCollection("players");
+        const deletedMatches = await deleteWholeCollection("matches");
+
+        const teamSnap = await getDocs(collection(db, "teams"));
+        const teamDocs = teamSnap.docs;
+        const CHUNK = 400;
+
+        for (let i = 0; i < teamDocs.length; i += CHUNK) {
+            const batch = writeBatch(db);
+            teamDocs.slice(i, i + CHUNK).forEach(d => {
+                batch.update(d.ref, {
+                    points: 0,
+                    wins: 0,
+                    draws: 0,
+                    losses: 0,
+                    goals: 0,
+                    conceded: 0
+                });
+            });
+            await batch.commit();
+        }
+
+        alert(
+            `Sıfırlama tamamlandı.\n` +
+            `Silinen oyuncu: ${deletedPlayers}\n` +
+            `Silinen maç: ${deletedMatches}\n` +
+            `Takımların lig istatistikleri sıfırlandı.`
+        );
+
+        updateDashboard();
+        showPage("dashboard");
+
+    } catch (error) {
+        console.error("RESET ERROR:", error);
+        alert("Sıfırlama sırasında hata oluştu: " + error.message);
+    }
 };
 
 

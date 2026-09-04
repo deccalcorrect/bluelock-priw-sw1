@@ -7,13 +7,13 @@
 body{
 
     margin:0;
-    background-color:#0a1128;
+    background-color:#150a28;
     background-image:
-        radial-gradient(circle at 15% 0%, rgba(37,99,235,.10), transparent 40%),
-        radial-gradient(circle at 85% 20%, rgba(168,85,247,.08), transparent 45%),
-        repeating-radial-gradient(circle at 20% 15%, transparent 0, transparent 60px, rgba(96,165,250,.05) 61px, rgba(96,165,250,.05) 62px),
-        repeating-radial-gradient(circle at 90% 75%, transparent 0, transparent 70px, rgba(220,38,38,.05) 71px, rgba(220,38,38,.05) 72px),
-        linear-gradient(180deg, #0a1128 0%, #0d1530 45%, #0a1128 100%);
+        radial-gradient(circle at 15% 0%, rgba(124,58,237,.10), transparent 40%),
+        radial-gradient(circle at 85% 20%, rgba(249,115,22,.08), transparent 45%),
+        repeating-radial-gradient(circle at 20% 15%, transparent 0, transparent 60px, rgba(167,139,250,.05) 61px, rgba(167,139,250,.05) 62px),
+        repeating-radial-gradient(circle at 90% 75%, transparent 0, transparent 70px, rgba(249,115,22,.05) 71px, rgba(249,115,22,.05) 72px),
+        linear-gradient(180deg, #150a28 0%, #180d33 45%, #150a28 100%);
     background-attachment:fixed;
     color:#fff;
 
@@ -27,7 +27,7 @@ body::before{
     z-index:0;
     pointer-events:none;
     opacity:.35;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Cg fill='none' stroke='%23274370' stroke-width='1.4'%3E%3Cpath d='M-50 40 Q 50 0 150 40 T 350 40 T 550 40'/%3E%3Cpath d='M-50 90 Q 50 50 150 90 T 350 90 T 550 90'/%3E%3Cpath d='M-50 140 Q 50 100 150 140 T 350 140 T 550 140'/%3E%3Cpath d='M-50 190 Q 50 150 150 190 T 350 190 T 550 190'/%3E%3Cpath d='M-50 240 Q 50 200 150 240 T 350 240 T 550 240'/%3E%3Cpath d='M-50 290 Q 50 250 150 290 T 350 290 T 550 290'/%3E%3Cpath d='M-50 340 Q 50 300 150 340 T 350 340 T 550 340'/%3E%3Cpath d='M-50 390 Q 50 350 150 390 T 350 390 T 550 390' /%3E%3C/g%3E%3C/svg%3E");
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Cg fill='none' stroke='%233a2a5e' stroke-width='1.4'%3E%3Cpath d='M-50 40 Q 50 0 150 40 T 350 40 T 550 40'/%3E%3Cpath d='M-50 90 Q 50 50 150 90 T 350 90 T 550 90'/%3E%3Cpath d='M-50 140 Q 50 100 150 140 T 350 140 T 550 140'/%3E%3Cpath d='M-50 190 Q 50 150 150 190 T 350 190 T 550 190'/%3E%3Cpath d='M-50 240 Q 50 200 150 240 T 350 240 T 550 240'/%3E%3Cpath d='M-50 290 Q 50 250 150 290 T 350 290 T 550 290'/%3E%3Cpath d='M-50 340 Q 50 300 150 340 T 350 340 T 550 340'/%3E%3Cpath d='M-50 390 Q 50 350 150 390 T 350 390 T 550 390' /%3E%3C/g%3E%3C/svg%3E");
     background-size:420px 420px;
 
 }
@@ -38,9 +38,9 @@ body::before{
     z-index:1;
 
 }
-::-webkit-scrollbar-track{ background:#0b0f18; }
-::-webkit-scrollbar-thumb{ background:#2b3550; border-radius:20px; }
-::-webkit-scrollbar-thumb:hover{ background:#3b4a72; }
+::-webkit-scrollbar-track{ background:#150e22; }
+::-webkit-scrollbar-thumb{ background:#4a2f70; border-radius:20px; }
+::-webkit-scrollbar-thumb:hover{ background:#f97316; }
 
 
 /* ANA YAPI */
@@ -59,9 +59,9 @@ body::before{
 .sidebar{
 
     width:260px;
-    background:linear-gradient(180deg,#12172a,#0d111c);
+    background:linear-gradient(180deg,#1c1330,#170f28);
     padding:25px 15px;
-    border-right:1px solid #252b3a;
+    border-right:1px solid #2b2140;
     position:fixed;
     height:100vh;
     overflow-y:auto;
@@ -75,7 +75,7 @@ body::before{
     text-align:center;
     margin:0;
     font-size:26px;
-    background:linear-gradient(90deg,#60a5fa,#a855f7);
+    background:linear-gradient(90deg,#a78bfa,#f97316);
     -webkit-background-clip:text;
     background-clip:text;
     color:transparent;
@@ -86,7 +86,7 @@ body::before{
 .league{
 
     text-align:center;
-    color:#3b82f6;
+    color:#8b5cf6;
     margin-bottom:35px;
     font-weight:bold;
     letter-spacing:.5px;
@@ -101,7 +101,7 @@ body::before{
     padding:14px;
     margin-bottom:10px;
 
-    background:#171d2b;
+    background:#201a35;
 
     color:white;
 
@@ -123,15 +123,16 @@ body::before{
 
 .sidebar button:hover{
 
-    background:#2563eb;
+    background:linear-gradient(90deg,#f97316,#ea580c);
     transform:translateX(3px);
+    box-shadow:0 4px 14px rgba(249,115,22,.35);
 
 }
 
 .sidebar button.active{
 
-    background:linear-gradient(90deg,#2563eb,#3b82f6);
-    box-shadow:0 0 0 2px #60a5fa inset, 0 0 16px rgba(59,130,246,.45);
+    background:linear-gradient(90deg,#7c3aed,#f97316);
+    box-shadow:0 0 0 2px #a78bfa inset, 0 0 16px rgba(139,92,246,.45);
 
 }
 
@@ -161,7 +162,7 @@ body::before{
 
 .topbar{
 
-    background:linear-gradient(135deg,#10141f,#141a2b);
+    background:linear-gradient(135deg,#190f2c,#1e1533);
 
     padding:20px;
 
@@ -175,7 +176,7 @@ body::before{
 
     margin-bottom:30px;
 
-    border:1px solid #222938;
+    border:1px solid #2b2140;
 
     box-shadow:0 6px 20px rgba(0,0,0,.25);
 
@@ -219,13 +220,13 @@ body::before{
 
 .box{
 
-    background:linear-gradient(160deg,#111827,#0e141f);
+    background:linear-gradient(160deg,#1c1430,#170f28);
 
     padding:25px;
 
     border-radius:15px;
 
-    border:1px solid #263043;
+    border:1px solid #34274f;
 
     transition:transform .18s, box-shadow .18s, border-color .18s;
 
@@ -234,7 +235,7 @@ body::before{
 .box:hover{
 
     transform:translateY(-4px);
-    border-color:#2f3d5c;
+    border-color:#f97316;
     box-shadow:0 10px 26px rgba(0,0,0,.35);
 
 }
@@ -243,7 +244,7 @@ body::before{
 
 .box h3{
 
-    color:#94a3b8;
+    color:#a599c4;
     margin:0 0 8px 0;
 
 }
@@ -254,7 +255,7 @@ body::before{
 
     font-size:35px;
 
-    background:linear-gradient(90deg,#60a5fa,#3b82f6);
+    background:linear-gradient(90deg,#a78bfa,#8b5cf6);
     -webkit-background-clip:text;
     background-clip:text;
     color:transparent;
@@ -271,7 +272,7 @@ body::before{
 .box.marketBox div{
 
     font-size:16px;
-    color:#e2e8f0;
+    color:#efe9f7;
 
 }
 
@@ -287,7 +288,7 @@ body::before{
 .box.kingBox p{
 
     font-size:16px;
-    color:#e2e8f0;
+    color:#efe9f7;
 
 }
 
@@ -307,7 +308,7 @@ body::before{
 
 .player-card{
 
-    background:#111827;
+    background:#1c1430;
 
     border-radius:15px;
 
@@ -315,7 +316,7 @@ body::before{
 
     margin-bottom:15px;
 
-    border:1px solid #273244;
+    border:1px solid #34274f;
 
 }
 
@@ -336,10 +337,10 @@ body::before{
 
 .team-card{
 
-    background:linear-gradient(160deg,#111827,#0e141f);
+    background:linear-gradient(160deg,#1c1430,#170f28);
     border-radius:15px;
     padding:20px;
-    border:1px solid #273244;
+    border:1px solid #34274f;
     cursor:pointer;
     transition:.2s ease;
     text-align:center;
@@ -348,9 +349,9 @@ body::before{
 
 .team-card:hover{
 
-    border-color:#2563eb;
+    border-color:#7c3aed;
     transform:translateY(-4px);
-    box-shadow:0 10px 26px rgba(37,99,235,.25);
+    box-shadow:0 10px 26px rgba(124,58,237,.25);
 
 }
 
@@ -374,7 +375,7 @@ body::before{
     display:flex;
     justify-content:center;
     gap:14px;
-    color:#94a3b8;
+    color:#a599c4;
     font-size:13px;
     margin-top:8px;
 
@@ -392,8 +393,8 @@ body::before{
 
 .buffTag{
 
-    background:#1e293b;
-    color:#93c5fd;
+    background:#2a1f45;
+    color:#fdba74;
     padding:3px 8px;
     border-radius:20px;
     font-size:11px;
@@ -412,7 +413,7 @@ table{
 
     border-collapse:collapse;
 
-    background:#111827;
+    background:#1c1430;
 
     border-radius:12px;
 
@@ -424,7 +425,7 @@ table{
 
 th{
 
-    background:#1e293b;
+    background:#2a1f45;
 
 }
 
@@ -434,14 +435,14 @@ td,th{
 
     padding:15px;
 
-    border-bottom:1px solid #273244;
+    border-bottom:1px solid #34274f;
     text-align:left;
 
 }
 
 .leagueTable tr:first-child td{
 
-    background:rgba(37,99,235,.12);
+    background:rgba(124,58,237,.12);
 
 }
 
@@ -463,11 +464,11 @@ select{
 
     margin:10px 0;
 
-    background:#111827;
+    background:#1c1430;
 
     color:white;
 
-    border:1px solid #374151;
+    border:1px solid #4a3a68;
 
     border-radius:8px;
 
@@ -486,7 +487,7 @@ textarea{
 label{
 
     display:block;
-    color:#94a3b8;
+    color:#a599c4;
     font-size:13px;
     margin-top:14px;
 
@@ -504,8 +505,8 @@ label{
 
 .panel{
 
-    background:#10141f;
-    border:1px solid #222938;
+    background:#190f2c;
+    border:1px solid #2b2140;
     border-radius:14px;
     padding:22px;
     margin-bottom:22px;
@@ -516,7 +517,7 @@ label{
 hr{
 
     border:none;
-    border-top:1px solid #263043;
+    border-top:1px solid #34274f;
     margin:20px 0;
 
 }
@@ -532,7 +533,7 @@ button{
 
 .btn{
 
-    background:linear-gradient(135deg,#2563eb,#3b82f6);
+    background:linear-gradient(135deg,#7c3aed,#f97316);
     color:#fff;
     border:none;
     padding:12px 18px;
@@ -548,7 +549,7 @@ button{
 
     opacity:.92;
     transform:translateY(-2px);
-    box-shadow:0 8px 18px rgba(37,99,235,.35);
+    box-shadow:0 8px 18px rgba(249,115,22,.35);
 
 }
 
@@ -572,13 +573,13 @@ button{
 
 .btn.ghost{
 
-    background:#1e293b;
+    background:#2a1f45;
 
 }
 
 .btn.ghost:hover{
 
-    box-shadow:0 8px 18px rgba(30,41,59,.5);
+    box-shadow:0 8px 18px rgba(124,58,237,.35);
 
 }
 
@@ -646,18 +647,18 @@ button{
 
 .forum-header{
 
-    color:#64748b;
+    color:#8b7aa8;
     font-size:12px;
     text-transform:uppercase;
     letter-spacing:.5px;
-    border-bottom:1px solid #222938;
+    border-bottom:1px solid #2b2140;
 
 }
 
 .forum-list{
 
-    background:#10141f;
-    border:1px solid #222938;
+    background:#190f2c;
+    border:1px solid #2b2140;
     border-radius:14px;
     overflow:hidden;
 
@@ -665,7 +666,7 @@ button{
 
 .forum-row{
 
-    border-bottom:1px solid #1c2230;
+    border-bottom:1px solid #241a3a;
     cursor:pointer;
     transition:background .15s, transform .15s;
 
@@ -679,7 +680,7 @@ button{
 
 .forum-row:hover{
 
-    background:#171d2b;
+    background:#201a35;
     transform:translateX(2px);
 
 }
@@ -690,7 +691,7 @@ button{
     height:42px;
     border-radius:50%;
     object-fit:cover;
-    background:#1e293b;
+    background:#2a1f45;
 
 }
 
@@ -702,7 +703,7 @@ button{
 
 .forum-sub{
 
-    color:#64748b;
+    color:#8b7aa8;
     font-size:12px;
 
 }
@@ -710,7 +711,7 @@ button{
 .forum-rating{
 
     font-weight:bold;
-    color:#3b82f6;
+    color:#8b5cf6;
     font-size:18px;
 
 }
@@ -719,7 +720,7 @@ button{
 
     padding:30px;
     text-align:center;
-    color:#64748b;
+    color:#8b7aa8;
 
 }
 
@@ -732,9 +733,9 @@ button{
 
 .fm-card{
 
-background:linear-gradient(160deg,#111827,#0d121c);
+background:linear-gradient(160deg,#1c1430,#170f28);
 
-border:1px solid #263043;
+border:1px solid #34274f;
 
 border-radius:18px;
 
@@ -771,11 +772,11 @@ border-radius:15px;
 
 object-fit:cover;
 
-border:3px solid #2563eb;
+border:3px solid #7c3aed;
 
-background:#1e293b;
+background:#2a1f45;
 
-box-shadow:0 0 24px rgba(37,99,235,.35);
+box-shadow:0 0 24px rgba(124,58,237,.35);
 
 }
 
@@ -793,7 +794,7 @@ margin:0;
 
 .fm-info h3{
 
-color:#60a5fa;
+color:#a78bfa;
 margin:4px 0;
 font-weight:normal;
 
@@ -801,7 +802,7 @@ font-weight:normal;
 
 .fm-info .fm-meta{
 
-color:#94a3b8;
+color:#a599c4;
 font-size:14px;
 
 }
@@ -823,7 +824,7 @@ margin-top:15px;
 
 .performance span{
 
-background:#1e293b;
+background:#2a1f45;
 
 padding:10px 18px;
 
@@ -846,8 +847,8 @@ margin-top:30px;
 
 .attribute-section h3{
 
-color:#94a3b8;
-border-bottom:1px solid #222938;
+color:#a599c4;
+border-bottom:1px solid #2b2140;
 padding-bottom:10px;
 
 }
@@ -876,7 +877,7 @@ font-size:14px;
 .attribute-title span.attVal{
 
 font-weight:bold;
-color:#e2e8f0;
+color:#efe9f7;
 
 }
 
@@ -886,7 +887,7 @@ color:#e2e8f0;
 
 height:12px;
 
-background:#1f2937;
+background:#241a38;
 
 border-radius:20px;
 
@@ -907,13 +908,13 @@ transition:width .4s ease;
 
 .fill.low{ background:#dc2626; box-shadow:0 0 10px rgba(220,38,38,.5); }
 .fill.mid{ background:#f59e0b; box-shadow:0 0 10px rgba(245,158,11,.5); }
-.fill.high{ background:#3b82f6; box-shadow:0 0 10px rgba(59,130,246,.5); }
+.fill.high{ background:#8b5cf6; box-shadow:0 0 10px rgba(139,92,246,.5); }
 .fill.top{ background:#22c55e; box-shadow:0 0 10px rgba(34,197,94,.5); }
-.fill.buffed{ background:linear-gradient(90deg,#a855f7,#22c55e); box-shadow:0 0 12px rgba(168,85,247,.5); }
+.fill.buffed{ background:linear-gradient(90deg,#f97316,#22c55e); box-shadow:0 0 12px rgba(249,115,22,.5); }
 
 .backBtn{
 
-background:#1e293b;
+background:#2a1f45;
 color:#fff;
 border:none;
 padding:10px 16px;
@@ -960,7 +961,7 @@ margin-left:8px;
 
 .visitorBadge{
 
-background:#334155;
+background:#3a2a52;
 padding:4px 10px;
 border-radius:20px;
 font-size:12px;
@@ -970,7 +971,7 @@ margin-left:8px;
 
 .capNote{
 
-color:#64748b;
+color:#8b7aa8;
 font-size:13px;
 margin-top:8px;
 
@@ -1013,18 +1014,18 @@ margin-top:8px;
 
 .rankPanel th{
 
-    color:#64748b;
+    color:#8b7aa8;
     font-size:11px;
     text-transform:uppercase;
     letter-spacing:.5px;
     background:transparent;
-    border-bottom:1px solid #222938;
+    border-bottom:1px solid #2b2140;
 
 }
 
 .rankPanel tbody tr:hover{
 
-    background:#171d2b;
+    background:#201a35;
 
 }
 
@@ -1036,8 +1037,8 @@ margin-top:8px;
     padding:10px 12px;
     border-radius:10px;
     margin-bottom:6px;
-    background:#0d111c;
-    border:1px solid #1c2334;
+    background:#170f28;
+    border:1px solid #2a1f42;
     transition:transform .12s, border-color .12s;
 
 }
@@ -1045,7 +1046,7 @@ margin-top:8px;
 .rankRow:hover{
 
     transform:translateX(3px);
-    border-color:#2563eb;
+    border-color:#7c3aed;
 
 }
 
@@ -1059,8 +1060,8 @@ margin-top:8px;
     height:26px;
     flex-shrink:0;
     border-radius:50%;
-    background:#1e293b;
-    color:#cbd5e1;
+    background:#2a1f45;
+    color:#d9cdea;
     font-size:12px;
     font-weight:bold;
     display:flex;
@@ -1081,7 +1082,7 @@ margin-top:8px;
 
 .rankVal{
 
-    color:#60a5fa;
+    color:#a78bfa;
     font-weight:bold;
     font-size:14px;
 
@@ -1099,8 +1100,8 @@ margin-top:8px;
     align-items:center;
     gap:14px;
     flex-wrap:wrap;
-    background:#0d111c;
-    border:1px solid #1c2334;
+    background:#170f28;
+    border:1px solid #2a1f42;
     border-radius:10px;
     padding:14px 16px;
     margin-bottom:10px;
@@ -1137,8 +1138,8 @@ margin-top:8px;
     align-items:center;
     gap:12px;
     padding:10px 14px;
-    background:#0d111c;
-    border:1px solid #1c2334;
+    background:#170f28;
+    border:1px solid #2a1f42;
     border-radius:10px;
     margin-bottom:6px;
     font-size:14px;
@@ -1148,7 +1149,7 @@ margin-top:8px;
 .eventMinute{
 
     font-weight:bold;
-    color:#60a5fa;
+    color:#a78bfa;
     min-width:32px;
 
 }

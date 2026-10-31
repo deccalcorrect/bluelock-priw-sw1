@@ -165,8 +165,11 @@ window.adminLogout = function () {
 // =====================================
 // HERŞEYİ SIFIRLA (ADMIN)
 // =====================================
-// Tüm oyuncuları ve maçları siler, takımların lig istatistiklerini
-// (puan, galibiyet, beraberlik, mağlubiyet, gol, yediği gol) 0'a çeker.
+// Tüm maçları siler, takımların lig istatistiklerini (puan, galibiyet,
+// beraberlik, mağlubiyet, gol, yediği gol) 0'a çeker ve oyuncuların maç
+// istatistiklerini (maç sayısı, sarı/kırmızı kart) sıfırlar.
+// Piyasa Değeri'ni belirleyen alanlar (gol, asist, match-up, kritik müdahale)
+// SIFIRLANMAZ; bu yüzden oyuncular da silinmez.
 // Takımların kendisi (isim/logo/buff) ve stat sınırı ayarı SİLİNMEZ.
 
 async function deleteWholeCollection(colName) {
@@ -188,9 +191,9 @@ window.resetEverything = async function () {
     if (!isAdmin) { alert("Yetkin yok"); return; }
 
     const confirm1 = confirm(
-        "DİKKAT: Bu işlem TÜM oyuncuları ve TÜM maç sonuçlarını kalıcı olarak silecek, " +
-        "lig tablosunu (puan/galibiyet/beraberlik/mağlubiyet/gol) sıfırlayacak.\n\n" +
-        "Takımların kendisi (isim/logo) silinmeyecek.\n\n" +
+        "DİKKAT: Bu işlem TÜM maç sonuçlarını kalıcı olarak silecek, " +
+        "lig tablosunu (puan/galibiyet/beraberlik/mağlubiyet/gol) ve oyuncuların maç/kart sayılarını sıfırlayacak.\n\n" +
+        "Oyuncular, takımlar ve Piyasa Değeri (gol/asist/match-up/kritik müdahale) silinmeyecek.\n\n" +
         "Devam etmek istiyor musun?"
     );
     if (!confirm1) return;
@@ -202,8 +205,24 @@ window.resetEverything = async function () {
     }
 
     try {
-        const deletedPlayers = await deleteWholeCollection("players");
         const deletedMatches = await deleteWholeCollection("matches");
+
+        // Oyuncular silinmez; sadece Piyasa Değeri'ne etki etmeyen alanlar sıfırlanır
+        const playerSnap = await getDocs(collection(db, "players"));
+        const playerDocs = playerSnap.docs;
+        const PCHUNK = 400;
+
+        for (let i = 0; i < playerDocs.length; i += PCHUNK) {
+            const batch = writeBatch(db);
+            playerDocs.slice(i, i + PCHUNK).forEach(d => {
+                batch.update(d.ref, {
+                    matches: 0,
+                    yellowCards: 0,
+                    redCards: 0
+                });
+            });
+            await batch.commit();
+        }
 
         const teamSnap = await getDocs(collection(db, "teams"));
         const teamDocs = teamSnap.docs;
@@ -226,9 +245,10 @@ window.resetEverything = async function () {
 
         alert(
             `Sıfırlama tamamlandı.\n` +
-            `Silinen oyuncu: ${deletedPlayers}\n` +
             `Silinen maç: ${deletedMatches}\n` +
-            `Takımların lig istatistikleri sıfırlandı.`
+            `Sıfırlanan oyuncu (maç/kart): ${playerDocs.length}\n` +
+            `Takımların lig istatistikleri sıfırlandı.\n` +
+            `Piyasa Değeri korundu.`
         );
 
         updateDashboard();
